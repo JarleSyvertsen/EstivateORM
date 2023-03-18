@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group 'hiof.gruppe1'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+task run(type: JavaExec) {
+    group = "Execution"
+    description = "Run the main class with JavaExecTask"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = "hiof.gruppe1.Main"
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
