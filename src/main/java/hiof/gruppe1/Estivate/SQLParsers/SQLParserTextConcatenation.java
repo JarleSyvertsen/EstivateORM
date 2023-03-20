@@ -1,4 +1,4 @@
 package hiof.gruppe1.Estivate.SQLParsers;
 
-public class SQLParserTextConcatenation {
+public class SQLParserTextConcatenation implements ISQLParser {
 }

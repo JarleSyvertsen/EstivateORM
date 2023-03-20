@@ -1,4 +1,11 @@
-package hiof.gruppe1.Estivate.SQLParsers.objectParsers;
+package hiof.gruppe1.Estivate.objectParsers;
 
-public class IObjectParser {
+import hiof.gruppe1.Estivate.Objects.SQLAttribute;
+
+import java.util.HashMap;
+
+public interface IObjectParser {
+    public HashMap<String, SQLAttribute> parseObjectToAttributeList(Object object);
+
+    public <T> T parseAttributeListToObject(Class<T> castTo, HashMap<String, SQLAttribute> attributeList);
 }
