@@ -10,7 +10,7 @@ public class ReflectionParser implements IObjectParser {
         return null;
     }
 
-    public <T> T parseAttributeListToObject(Class<T> castTo, HashMap<String, SQLAttribute> attributeList) {
+    public <T> T parseAttributeListToObject(Class<T> castTo, HashMap<String, SQLAttribute<Object>> attributeList) {
         return null;
     }
 
