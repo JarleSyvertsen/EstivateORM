@@ -7,4 +7,12 @@ public class SQLAttribute<T> {
         this.data = data;
         this.t = t;
     }
+
+    public Class<T> getData() {
+        return data;
+    }
+
+    public T getInnerClass() {
+        return t;
+    }
 }

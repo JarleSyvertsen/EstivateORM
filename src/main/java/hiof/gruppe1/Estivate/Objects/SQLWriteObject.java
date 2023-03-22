@@ -2,6 +2,6 @@ package hiof.gruppe1.Estivate.Objects;
 
 import java.util.HashMap;
 
-public class SQLObject {
+public class SQLWriteObject {
     HashMap<String, SQLAttribute> attributes;
 }
