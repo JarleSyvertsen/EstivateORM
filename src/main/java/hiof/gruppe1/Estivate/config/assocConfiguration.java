@@ -1,14 +1,14 @@
 package hiof.gruppe1.Estivate.config;
 
-public class assocConfiguration {
+public class assocConfiguration implements ConfigurationObject {
     String javaAssoc;
     String SQLAssoc;
     String affectedClass;
+    Configuration callingConfig;
 
-    public assocConfiguration(String affectedClass) {
+    public assocConfiguration(String affectedClass, Configuration callingConfig) {
         this.affectedClass = affectedClass;
     }
-
 
 
     public assocConfiguration(String affectedClass, String javaAssoc, String SQLAssoc) {
@@ -16,6 +16,7 @@ public class assocConfiguration {
         this.SQLAssoc = SQLAssoc;
         this.affectedClass = affectedClass;
     }
+
 
     public String getJavaAssoc() {
         return javaAssoc;
@@ -33,7 +34,14 @@ public class assocConfiguration {
         this.SQLAssoc = SQLAssoc;
     }
 
-    public void saveConfiguration() {
+    public String getAffectedClass() {
+        return affectedClass;
+    }
 
+    public void setAffectedClass(String affectedClass) {
+        this.affectedClass = affectedClass;
+    }
+    public void SaveConfiguration() {
+        callingConfig.saveConfiguration();
     }
 }

@@ -1,9 +1,12 @@
 package hiof.gruppe1.Estivate.config;
 
 import java.io.File;
+import java.util.Queue;
 
 public class Configuration {
     File filePersistentStorage;
+    Queue<ConfigurationObject> storedConfigurations;
+    assocConfiguration currentConfiguration;
 
     public Configuration() {
     }
@@ -13,11 +16,19 @@ public class Configuration {
     }
 
     public assocConfiguration configObject(String objectName) {
-        return new assocConfiguration(objectName);
+        if (currentConfiguration.getAffectedClass().compareTo(objectName) != 0) {
+            currentConfiguration = new assocConfiguration(objectName, this);
+        }
+        return currentConfiguration;
+    }
+
+    public void saveConfiguration() {
+        storedConfigurations.add(currentConfiguration);
+        currentConfiguration = null;
     }
 
     public <T> void setDefault(Class<T> workingClass, String javaAssoc, String SQLAssoc) {
-        new assocConfiguration(workingClass.getSimpleName(), javaAssoc, SQLAssoc).saveConfiguration();
+        storedConfigurations.add(new assocConfiguration(workingClass.getSimpleName(), javaAssoc, SQLAssoc));
     }
 }
 
