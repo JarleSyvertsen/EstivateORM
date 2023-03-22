@@ -2,13 +2,14 @@ package hiof.gruppe1.Estivate.EstivateCore;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
+import org.mariuszgromada.math.mxparser.Argument;
+import org.mariuszgromada.math.mxparser.Expression;
 
-import java.util.Queue;
+import java.util.HashMap;
 
 public class EstivateMultiTransaction {
     SQLMultiCommand sqlMultiCommand;
-    Queue<SQLAttribute> results;
-    int finalResult = 0;
+    HashMap<String, SQLAttribute> results = new HashMap<>();
 
     public EstivateMultiTransaction getAggreagate() {
         sqlMultiCommand = new SQLMultiCommand<>();
@@ -21,20 +22,15 @@ public class EstivateMultiTransaction {
     }
 
     public <T> EstivateMultiTransaction count(Class<T> workingClass, String condition, String resultName) {
-        // Create temporary SQLCommand, execute, return result to the result arraylist.
+        // Create temporary SQLCommand, execute, return result to the result queue.
         return this;
     }
 
-    public void result(String command) {
-        // Implement supporting 2 and 2 operations.
-        // Could mean we simply use mathParser/A switch to calculate the last two results.
-        // And require the user to daisy-chain these results via multiple calls to the result and to counts etc.
-        // Probably the most likely solution.
-
-        // Implement as is
-        // Need to programmatically parse the string, might have to change this interface to something less useful, but easier to implement.
-        // Might use math parser for the logic, but we still need to pull out the arguments, find them in result, and call the expression
-        // function with a varying amount of variables.
-        finalResult = 0;
+    public double result(String command) {
+        // Not sure if its gonna work, buth mathX is a library for parsing strings and create
+        // Arguments out of the SQLAttributes here
+        Expression exp = new Expression(command);
+        results.forEach((k, v) -> exp.addArguments(new Argument(k + " = " + v)));
+        return exp.calculate();
     }
 }
