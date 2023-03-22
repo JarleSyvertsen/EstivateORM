@@ -13,9 +13,12 @@ public class Configuration {
     }
 
     public assocConfiguration configObject(String objectName) {
-        return new assocConfiguration();
+        return new assocConfiguration(objectName);
     }
 
+    public <T> void setDefault(Class<T> workingClass, String javaAssoc, String SQLAssoc) {
+        new assocConfiguration(workingClass.getSimpleName(), javaAssoc, SQLAssoc).saveConfiguration();
+    }
 }
 
 

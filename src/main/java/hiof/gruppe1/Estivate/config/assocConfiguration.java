@@ -3,8 +3,18 @@ package hiof.gruppe1.Estivate.config;
 public class assocConfiguration {
     String javaAssoc;
     String SQLAssoc;
+    String affectedClass;
 
-    public assocConfiguration() {
+    public assocConfiguration(String affectedClass) {
+        this.affectedClass = affectedClass;
+    }
+
+
+
+    public assocConfiguration(String affectedClass, String javaAssoc, String SQLAssoc) {
+        this.javaAssoc = javaAssoc;
+        this.SQLAssoc = SQLAssoc;
+        this.affectedClass = affectedClass;
     }
 
     public String getJavaAssoc() {
