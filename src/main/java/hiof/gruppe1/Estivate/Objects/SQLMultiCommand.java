@@ -14,11 +14,11 @@ public class SQLMultiCommand<T> {
 
     }
 
-    public void setClass(Class<T> outputClass) {
+    public void retrieveClass(Class<T> outputClass) {
         this.outputClass = outputClass;
     }
 
-    public void setFormat(String outputFormat) {
+    public void retrieveFormat(String outputFormat) {
         this.outputFormat = outputFormat;
     }
 
@@ -31,4 +31,5 @@ public class SQLMultiCommand<T> {
     public void addCondition(String condition) {
         whereStatements.add(condition);
     }
+
 }
