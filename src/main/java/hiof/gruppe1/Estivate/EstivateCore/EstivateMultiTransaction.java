@@ -26,6 +26,8 @@ public class EstivateMultiTransaction {
 
     public int result(String command) {
         // Need to programmatically parse the string, might have to change this interface to something less useful, but easier to implement.
+        // Might use math parser for the logic, but we still need to pull out the arguments, find them in result, and call the expression
+        // function with a varying amount of variables.
         return 0;
     }
 }
