@@ -30,7 +30,7 @@ public class EstivateMultiTransaction {
         // Not sure if its gonna work, buth mathX is a library for parsing strings and create
         // Arguments out of the SQLAttributes here
         Expression exp = new Expression(command);
-        results.forEach((k, v) -> exp.addArguments(new Argument(k + " = " + v)));
+        results.forEach((k, v) -> exp.addArguments(new Argument(k + " = " + v.getData())));
         return exp.calculate();
     }
 }
