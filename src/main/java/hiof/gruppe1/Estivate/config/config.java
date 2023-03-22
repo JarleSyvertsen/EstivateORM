@@ -3,15 +3,15 @@ package hiof.gruppe1.Estivate.config;
 import java.io.File;
 import java.util.Queue;
 
-public class Configuration {
+public class config {
     File filePersistentStorage;
     Queue<ConfigurationObject> storedConfigurations;
     assocConfiguration currentConfiguration;
 
-    public Configuration() {
+    public config() {
     }
 
-    public Configuration(File filePersistentStorage) {
+    public config(File filePersistentStorage) {
         this.filePersistentStorage = filePersistentStorage;
     }
 

@@ -4,9 +4,9 @@ public class assocConfiguration implements ConfigurationObject {
     String javaAssoc;
     String SQLAssoc;
     String affectedClass;
-    Configuration callingConfig;
+    config callingConfig;
 
-    public assocConfiguration(String affectedClass, Configuration callingConfig) {
+    public assocConfiguration(String affectedClass, config callingConfig) {
         this.affectedClass = affectedClass;
     }
 
