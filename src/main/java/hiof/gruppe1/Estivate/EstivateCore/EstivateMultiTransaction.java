@@ -26,6 +26,11 @@ public class EstivateMultiTransaction {
         return this;
     }
 
+    public <T> EstivateMultiTransaction sumFields(Class<T> workingClass, String condition, String sumColumn, String resultName) {
+        return this;
+    }
+
+
     public double result(String command) {
         // Not sure if its gonna work, buth mathX is a library for parsing strings and create
         // Arguments out of the SQLAttributes here
