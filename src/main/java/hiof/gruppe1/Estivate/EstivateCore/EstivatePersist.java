@@ -9,6 +9,7 @@ import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 
 public class EstivatePersist {
     // Default, could be defined by config if multiple parsers are present.
@@ -25,13 +26,13 @@ public class EstivatePersist {
         return null;
     }
 
-    public <T> SQLSearchQuery getAll(Class<T> output) {
+    public <T> ArrayList<T> getAll(Class<T> output) {
         return null;
     }
 
     // Meant to be used as a builderPattern, where a SQLMulticommand is used to create a more complex SQL query.
     // The format is in this case defined via .retrieveObject
-    public <T> T getMany() {
+    public <T> SQLSearchQuery getMany() {
         return null;
     }
 
