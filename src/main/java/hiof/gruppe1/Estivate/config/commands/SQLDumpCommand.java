@@ -8,7 +8,7 @@ public class SQLDumpCommand {
     String currentWorkingFile;
     Connection connection;
 
-    public SQLDumpCommand setName(String filename) {
+    public SQLDumpCommand setOutputLocation(String filename) {
         this.currentWorkingFile = filename;
         return this;
     }

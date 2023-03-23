@@ -7,6 +7,7 @@ public class SQLRestoreCommand {
     String outputDirectory;
     String databaseToRestore;
     Connection connection;
+    String callingUser;
     HashMap<String, String> arguments;
 
     public SQLRestoreCommand outputDirectory(String outputDirectory) {
@@ -18,6 +19,10 @@ public class SQLRestoreCommand {
         this.databaseToRestore = database;
         return this;
     }
+    public SQLRestoreCommand asUser(String username)  {
+        return this;
+    }
+
 
     public void execute() {
 

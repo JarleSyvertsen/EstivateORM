@@ -8,6 +8,13 @@ import java.sql.Connection;
 public class configDatabase {
     Connection connection;
 
+    public configDatabase() {
+    }
+
+    public configDatabase(Connection connection) {
+        this.connection = connection;
+    }
+
     public SQLDumpCommand startSQLDump() {
         return new SQLDumpCommand();
     }
