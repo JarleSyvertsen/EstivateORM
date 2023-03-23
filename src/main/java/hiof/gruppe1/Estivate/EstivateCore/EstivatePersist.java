@@ -1,5 +1,7 @@
 package hiof.gruppe1.Estivate.EstivateCore;
 
+import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
+import hiof.gruppe1.Estivate.Objects.SQLSearchQuery;
 import hiof.gruppe1.Estivate.SQLParsers.ISQLParser;
 import hiof.gruppe1.Estivate.SQLParsers.SQLParserTextConcatenation;
 import hiof.gruppe1.Estivate.config.config;
@@ -23,7 +25,7 @@ public class EstivatePersist {
         return null;
     }
 
-    public <T> T getAll(Class<T> output) {
+    public <T> SQLSearchQuery getAll(Class<T> output) {
         return null;
     }
 

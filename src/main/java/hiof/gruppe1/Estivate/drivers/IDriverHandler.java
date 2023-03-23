@@ -1,4 +1,4 @@
-package hiof.gruppe1.Estivate.SQLParsers.drivers;
+package hiof.gruppe1.Estivate.drivers;
 
 public class IDriverHandler {
 }
