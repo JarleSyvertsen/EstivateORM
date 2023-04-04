@@ -1,4 +1,7 @@
 package hiof.gruppe1.Estivate.drivers;
 
-public class IDriverHandler {
+import java.sql.Connection;
+
+public interface IDriverHandler {
+    public Connection connect();
 }
