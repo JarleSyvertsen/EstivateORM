@@ -19,5 +19,6 @@ public class SQLWriteObject {
     public HashMap<String, SQLAttribute> getAttributeList() {
         return attributes;
     }
+
 }
 

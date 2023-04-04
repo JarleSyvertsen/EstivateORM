@@ -16,6 +16,6 @@ public class Main {
         SQLWriteObject writeObject = new SQLWriteObject();
         writeObject.setAttributes(attributes);
         SQLParserTextConcatenation parse = new SQLParserTextConcatenation();
-        parse.writeToDatabase(writeObject);
+        System.out.println(parse.parseWriteObjectToDB(writeObject));
     }
 }

@@ -12,6 +12,7 @@ public class SQLAttribute {
     public <T> T getData() {
         return (T) objectClass.cast(object);
     }
+
     public <T> T getDataCast(Class<T> typeToCast) {
         return (T) typeToCast.cast(object);
     }
