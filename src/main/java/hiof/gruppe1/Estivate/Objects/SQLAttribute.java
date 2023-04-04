@@ -1,18 +1,15 @@
 package hiof.gruppe1.Estivate.Objects;
 
 public class SQLAttribute<T> {
-    private final Class<T> data;
-    private final T t;
-    public SQLAttribute(Class<T> data, T t) {
-        this.data = data;
-        this.t = t;
+    private Object object;
+    private Class objectClass;
+    public SQLAttribute(Class objectClass, Object object) {
+        this.object = object;
+        this.objectClass = objectClass;
     }
 
-    public Class<T> getData() {
-        return data;
-    }
-
-    public T getInnerClass() {
-        return t;
+    @SuppressWarnings("unchecked")
+    public T getData() {
+        return (T) objectClass.cast(object);
     }
 }
