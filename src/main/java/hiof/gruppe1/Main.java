@@ -14,6 +14,8 @@ public class Main {
         HashMap<String, SQLAttribute> attributes = rp.parseObjectToAttributeList(perArne);
         SQLWriteObject writeObject = new SQLWriteObject();
         writeObject.setAttributes(attributes);
-        writeObject.getAttributeList().forEach((k,v) -> System.out.println(v.getData()));
+        writeObject.getAttributeList().forEach((k,v) -> System.out.println());
+        SQLAttribute test = new SQLAttribute(Integer.class, 5);
+        int i = test.getData();
     }
 }

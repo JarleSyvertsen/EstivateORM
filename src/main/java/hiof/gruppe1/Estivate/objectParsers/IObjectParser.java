@@ -7,5 +7,5 @@ import java.util.HashMap;
 public interface IObjectParser {
     public <T> HashMap<String, SQLAttribute> parseObjectToAttributeList(Object object);
 
-    public <T> T parseAttributeListToObject(Class<T> castTo, HashMap<String, SQLAttribute<Object>> attributeList);
+    public <T> T parseAttributeListToObject(Class<T> castTo, HashMap<String, SQLAttribute> attributeList);
 }

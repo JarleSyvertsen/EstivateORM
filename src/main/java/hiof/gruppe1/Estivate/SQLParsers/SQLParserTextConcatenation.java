@@ -13,6 +13,16 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
-        return false;
+        parseWriteObjectToDB(writeObject);
+        return true;
     }
+
+    private String parseWriteObjectToDB(SQLWriteObject writeObject) {
+        String finalSQL;
+        String insertInto = "INSERT INTO ";
+        String insertTable = writeObject.getAttributeList().get("Id").getDataType(String.class);
+        return "";
+    }
+
+
 }
