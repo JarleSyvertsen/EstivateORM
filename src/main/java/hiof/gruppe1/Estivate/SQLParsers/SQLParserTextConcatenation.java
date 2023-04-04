@@ -20,7 +20,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     // Should be private, just for debugging
     public String parseWriteObjectToDB(SQLWriteObject writeObject) {
         if(writeObject.getAttributeList().get("Id").getData().toString().equals("-1")) {
-        //    writeObject.getAttributeList().remove("Id");
+         writeObject.getAttributeList().remove("Id");
         }
 
         String insertInto = "INSERT INTO ";
@@ -40,17 +40,20 @@ public class SQLParserTextConcatenation implements ISQLParser {
             valuesString.append(createWritableValue(v));
             valuesString.append(",");
         });
+
+        createValuesInParenthesis(finalString, keyString);
+        finalString.append(values);
+        createValuesInParenthesis(finalString, valuesString);
+        return finalString.toString();
+    }
+
+    private static void createValuesInParenthesis(StringBuilder finalString, StringBuilder keyString) {
         finalString.append("(");
         finalString.append(keyString);
         finalString.deleteCharAt(finalString.length() - 1);
         finalString.append(")");
-        finalString.append(values);
-        finalString.append("(");
-        finalString.append(valuesString);
-        finalString.deleteCharAt(finalString.length() - 1);
-        finalString.append(")");
-        return finalString.toString();
     }
+
     public String createWritableValue(SQLAttribute sqlAttr) {
         if(sqlAttr.getData().getClass().getSimpleName().equals("String")) {
             return String.format("\"%s\"", sqlAttr.getData().toString());
