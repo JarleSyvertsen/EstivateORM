@@ -2,6 +2,7 @@ package hiof.gruppe1;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
+import hiof.gruppe1.Estivate.SQLParsers.SQLParserTextConcatenation;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
 import hiof.gruppe1.testData.Author;
 
@@ -14,8 +15,7 @@ public class Main {
         HashMap<String, SQLAttribute> attributes = rp.parseObjectToAttributeList(perArne);
         SQLWriteObject writeObject = new SQLWriteObject();
         writeObject.setAttributes(attributes);
-        writeObject.getAttributeList().forEach((k,v) -> System.out.println());
-        SQLAttribute test = new SQLAttribute(Integer.class, 5);
-        int i = test.getData();
+        SQLParserTextConcatenation parse = new SQLParserTextConcatenation();
+        parse.writeToDatabase(writeObject);
     }
 }

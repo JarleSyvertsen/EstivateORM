@@ -20,8 +20,8 @@ public class SQLParserTextConcatenation implements ISQLParser {
     private String parseWriteObjectToDB(SQLWriteObject writeObject) {
         String finalSQL;
         String insertInto = "INSERT INTO ";
-        String insertTable = writeObject.getAttributeList().get("Id").getDataType(String.class);
-        return "";
+        String insertTable = writeObject.getAttributeList().get("Class").getInnerClass();
+        return insertTable;
     }
 
 
