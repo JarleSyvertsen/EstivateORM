@@ -50,7 +50,7 @@ public class SQLiteDriver implements IDriverHandler {
     }
 
     @Override
-    public HashMap<String, String> describedTable(Class classOfTable) {
+    public HashMap<String, String> describeTable(Class classOfTable) {
         String tableQuery = describeTableQuery(classOfTable);
         ResultSet tableResult = executeQuery(tableQuery);
 

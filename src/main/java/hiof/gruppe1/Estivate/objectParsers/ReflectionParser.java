@@ -24,6 +24,7 @@ public class ReflectionParser implements IObjectParser {
     }
 
     public <T> T parseAttributeListToObject(Class<T> castTo, HashMap<String, SQLAttribute> attributeList) {
+
         return null;
     }
 

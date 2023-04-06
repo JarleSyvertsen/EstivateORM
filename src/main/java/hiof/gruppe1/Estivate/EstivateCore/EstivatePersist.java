@@ -53,7 +53,7 @@ public class EstivatePersist {
      *
      */
     public <T> T getOne(int id, Class<T> output) {
-        return null;
+        return SQLParser.readFromDatabase(output, id);
     }
 
     /**

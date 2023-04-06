@@ -13,6 +13,7 @@ public class Main {
         Author perArne = new Author("Per Arne", "To tredjedel ved fra ORM");
         IDriverHandler driverHandler = new SQLiteDriver("src/main/java/resources/estivateSQLite.db");
       //  driverHandler.describedTable(Author.class);
-        persist.persist(perArne);
+    //    persist.persist(perArne);
+        persist.getOne(1, Author.class);
     }
 }

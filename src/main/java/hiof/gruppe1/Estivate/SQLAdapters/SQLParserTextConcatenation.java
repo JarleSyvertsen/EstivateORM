@@ -4,21 +4,28 @@ import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
+import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
+import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
 
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class SQLParserTextConcatenation implements ISQLParser {
     private final String SELECT = "SELECT ";
+    private final String SELECT_ALL_FROM = "SELECT * FROM ";
     private final String INSERT_INTO = "INSERT INTO ";
     private final String VALUES = " VALUES ";
     private final String WHERE = " WHERE ";
     private final String ID_EQUALS = "id = ";
 
     IDriverHandler sqlDriver;
+    IObjectParser objectParser;
 
     public SQLParserTextConcatenation(IDriverHandler sqlDriver) {
         this.sqlDriver = sqlDriver;
+        this.objectParser = new ReflectionParser();
     }
 
     public Boolean writeToDatabase(SQLMultiCommand multiCommand) {
@@ -31,10 +38,26 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return true;
     }
 
-    public <T> T readFromDatabase(Class castTo, int id) {
+    public <T> T readFromDatabase(Class<T> castTo, int id) {
         String SQLQuery = createRadableSQLString(castTo, id);
+        HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
-        return null;
+
+        HashMap<String,SQLAttribute> readAttributes = new HashMap<>();
+        try {
+            for (Map.Entry<String, String> entry : describedTable.entrySet()) {
+                String attributeName = entry.getKey();
+                String attributeValue = entry.getValue();
+                switch (attributeValue) {
+                    case "INTEGER" -> readAttributes.put(attributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
+                    case "TEXT" -> readAttributes.put(attributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return objectParser.parseAttributeListToObject(castTo, readAttributes);
     }
 
     private String createRadableSQLString(Class queryClass, int id) {
@@ -46,9 +69,9 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
     private String createRadableSQLString(Class queryClass, String limiter) {
         StringBuilder reader = new StringBuilder();
-        reader.append(SELECT);
+        reader.append(SELECT_ALL_FROM);
         reader.append(queryClass.getSimpleName());
-        reader.append(limiter != null ? reader.append(limiter) : "");
+        reader.append(limiter != null ? limiter : "");
         return reader.toString();
     }
 

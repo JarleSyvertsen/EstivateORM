@@ -20,7 +20,7 @@ public class MySQLDriver implements IDriverHandler {
     }
 
     @Override
-    public HashMap<String, String> describedTable(Class classOfTable) {
+    public HashMap<String, String> describeTable(Class classOfTable) {
         return null;
     }
 }
