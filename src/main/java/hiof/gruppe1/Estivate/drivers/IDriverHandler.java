@@ -1,7 +1,10 @@
 package hiof.gruppe1.Estivate.drivers;
 
-import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.HashMap;
 
 public interface IDriverHandler {
-    public Connection connect();
+    public ResultSet executeQuery(String query);
+    public void executeInsert(String query);
+    public HashMap<String, String> describedTable(Class classOfTable);
 }

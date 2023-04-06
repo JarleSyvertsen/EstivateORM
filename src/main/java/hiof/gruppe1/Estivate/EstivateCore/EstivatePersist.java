@@ -1,18 +1,16 @@
 package hiof.gruppe1.Estivate.EstivateCore;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
-import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
 import hiof.gruppe1.Estivate.Objects.SQLSearchQuery;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
-import hiof.gruppe1.Estivate.SQLParsers.ISQLParser;
-import hiof.gruppe1.Estivate.SQLParsers.SQLParserTextConcatenation;
+import hiof.gruppe1.Estivate.SQLAdapters.ISQLParser;
+import hiof.gruppe1.Estivate.SQLAdapters.SQLParserTextConcatenation;
 import hiof.gruppe1.Estivate.config.config;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.drivers.SQLiteDriver;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -28,9 +26,9 @@ public class EstivatePersist {
     private IDriverHandler sqlDriver;
    public EstivatePersist(String relativeURL) {
         this.objectParser  = new ReflectionParser();
-        this.SQLParser = new SQLParserTextConcatenation();
-        WorkingConfiguration  = new config();
         this.sqlDriver = new SQLiteDriver(relativeURL);
+        this.SQLParser = new SQLParserTextConcatenation(sqlDriver);
+        WorkingConfiguration  = new config();
     }
 
     /**
@@ -42,7 +40,7 @@ public class EstivatePersist {
         HashMap<String, SQLAttribute> attributes = objectParser.parseObjectToAttributeList(object);
         SQLWriteObject writeObject = new SQLWriteObject();
         writeObject.setAttributes(attributes);
-        System.out.println(SQLParser.parseWriteObjectToDB(writeObject));
+        SQLParser.writeToDatabase(writeObject);
         return true;
     }
 

@@ -1,24 +1,36 @@
-package hiof.gruppe1.Estivate.SQLParsers;
+package hiof.gruppe1.Estivate.SQLAdapters;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
+import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 
-import java.sql.Connection;
+import java.sql.ResultSet;
 
 public class SQLParserTextConcatenation implements ISQLParser {
-    Connection connection;
+    IDriverHandler sqlDriver;
+
+    public SQLParserTextConcatenation(IDriverHandler sqlDriver) {
+        this.sqlDriver = sqlDriver;
+    }
 
     public Boolean writeToDatabase(SQLMultiCommand multiCommand) {
         return false;
     }
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
-        parseWriteObjectToDB(writeObject);
+        String writeableString = createWritableSQLString(writeObject);
+        sqlDriver.executeInsert(writeableString);
         return true;
     }
+
+    public <T> T readFromDatabase(Class castTo, int id) {
+        return null;
+    }
+
+
     // Should be private, just for debugging
-    public String parseWriteObjectToDB(SQLWriteObject writeObject) {
+    private String createWritableSQLString(SQLWriteObject writeObject) {
         if(writeObject.getAttributeList().get("id").getData().toString().equals("-1")) {
          writeObject.getAttributeList().remove("id");
         }
@@ -44,6 +56,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
         createValuesInParenthesis(finalString, keyString);
         finalString.append(values);
         createValuesInParenthesis(finalString, valuesString);
+        finalString.append(" RETURNING id");
         return finalString.toString();
     }
 
@@ -54,7 +67,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
         finalString.append(")");
     }
 
-    public String createWritableValue(SQLAttribute sqlAttr) {
+    private String createWritableValue(SQLAttribute sqlAttr) {
         if(sqlAttr.getData().getClass().getSimpleName().equals("String")) {
             return String.format("\"%s\"", sqlAttr.getData().toString());
         }

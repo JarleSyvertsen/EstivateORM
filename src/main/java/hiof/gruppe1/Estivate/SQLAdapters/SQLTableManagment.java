@@ -1,4 +1,4 @@
-package hiof.gruppe1.Estivate.SQLParsers;
+package hiof.gruppe1.Estivate.SQLAdapters;
 
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 
