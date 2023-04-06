@@ -5,6 +5,16 @@ public class Author {
     private String name;
     private String books;
 
+    private Page favoritePage;
+
+    public Page getFavoritePage() {
+        return favoritePage;
+    }
+
+    public void setFavoritePage(Page favoritePage) {
+        this.favoritePage = favoritePage;
+    }
+
     public Author() {
     }
 

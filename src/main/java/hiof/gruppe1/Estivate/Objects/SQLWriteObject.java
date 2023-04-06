@@ -8,6 +8,10 @@ public class SQLWriteObject {
     public SQLWriteObject() {
     }
 
+    public SQLWriteObject(HashMap<String, SQLAttribute> attributes) {
+        this.attributes = attributes;
+    }
+
     public void addAttribute(String name, SQLAttribute attribute) {
         attributes.put(name, attribute);
     }

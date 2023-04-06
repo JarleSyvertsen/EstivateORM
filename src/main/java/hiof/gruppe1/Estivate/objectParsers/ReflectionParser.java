@@ -7,17 +7,20 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 public class ReflectionParser implements IObjectParser {
-    public<T> HashMap<String, SQLAttribute> parseObjectToAttributeList(Object object) {
+    public <T> HashMap<String, SQLAttribute> parseObjectToAttributeList(Object object) {
         HashMap<String, SQLAttribute> attributes = new HashMap<>();
         for (Method getter : object.getClass().getMethods()) {
-            if(getter.getName().startsWith("get") && getter.getParameterTypes().length == 0) {
+            if (getter.getName().startsWith("get") && getter.getParameterTypes().length == 0) {
                 try {
                     final Object returnValue = getter.invoke(object);
-                  attributes.put(getter.getName().substring(3).toLowerCase(), new SQLAttribute(returnValue.getClass(), returnValue));
+
+                    if (returnValue != null) {
+                        attributes.put(getter.getName().substring(3).toLowerCase(), new SQLAttribute(returnValue.getClass(), returnValue));
+                    }
+
                 } catch (InvocationTargetException | IllegalAccessException e) {
                     System.out.println(e);
                 }
-
             }
         }
         return attributes;
@@ -25,11 +28,13 @@ public class ReflectionParser implements IObjectParser {
 
     public <T> T parseAttributeListToObject(Class<T> castTo, HashMap<String, SQLAttribute> attributeList) {
         T creationObject = createClassOfType(castTo);
-        for(Method setter : creationObject.getClass().getMethods()) {
-            if(setter.getName().startsWith("set")) {
+        for (Method setter : creationObject.getClass().getMethods()) {
+            if (setter.getName().startsWith("set")) {
                 String setName = setter.getName().substring(3).toLowerCase();
                 try {
-                    setter.invoke(creationObject, attributeList.get(setName).getDataRaw());
+                    if (attributeList.get(setName) != null) {
+                        setter.invoke(creationObject, attributeList.get(setName).getDataRaw());
+                    }
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 } catch (InvocationTargetException e) {

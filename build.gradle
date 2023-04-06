@@ -44,7 +44,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'hiof.rammeverk.gruppe1'
             artifactId = 'estivate'
-            version = "0.1-Test"
+            version = "0.2-Test"
             from components.java
 
             pom {

@@ -6,6 +6,7 @@ import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
+import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
         String writeableString = createWritableSQLString(writeObject);
-        sqlDriver.executeInsert(writeableString);
+       sqlDriver.executeInsert(writeableString);
         return true;
     }
 
@@ -79,16 +80,19 @@ public class SQLParserTextConcatenation implements ISQLParser {
         if(writeObject.getAttributeList().get("id").getData().toString().equals("-1")) {
          writeObject.getAttributeList().remove("id");
         }
-
         String insertTable = writeObject.getAttributeList().remove("class").getInnerClass();
 
+        // PartBuilders to allow building the String in a non-linear way.
         StringBuilder finalString = new StringBuilder();
         StringBuilder keyString = new StringBuilder();
         StringBuilder valuesString = new StringBuilder();
+        StringBuilder recursiveAdds = traverseNonPrimitives(writeObject);
+        // Remove the complex objects after parsing.
+        writeObject.getAttributeList().entrySet().removeIf(entry -> !isSimple(entry.getValue().getData().getClass()));
 
+        // Appends
         finalString.append(INSERT_INTO);
         finalString.append(insertTable);
-
         writeObject.getAttributeList().forEach((k,v) -> {
             keyString.append(k);
             keyString.append(",");
@@ -100,7 +104,22 @@ public class SQLParserTextConcatenation implements ISQLParser {
         finalString.append(VALUES);
         createValuesInParenthesis(finalString, valuesString);
         finalString.append(" RETURNING id");
+     //   finalString.append(recursiveAdds);
+
         return finalString.toString();
+    }
+
+    private StringBuilder traverseNonPrimitives(SQLWriteObject writeObject) {
+        StringBuilder recursiveAdds = new StringBuilder();
+        writeObject.getAttributeList().forEach((k, v) -> {
+            if(!isSimple(v.getData().getClass())) {
+                HashMap<String, SQLAttribute> parsedAttributes = objectParser.parseObjectToAttributeList(v.getDataRaw());
+                SQLWriteObject recursiveObject = new SQLWriteObject(parsedAttributes);
+                recursiveAdds.append(" ");
+                recursiveAdds.append(createWritableSQLString(recursiveObject));
+            }
+        });
+        return recursiveAdds;
     }
 
     private static void createValuesInParenthesis(StringBuilder finalString, StringBuilder keyString) {
