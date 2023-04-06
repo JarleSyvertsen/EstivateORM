@@ -12,8 +12,9 @@ public class Main {
         EstivatePersist persist = estivateBuilder.setDBUrl("src/main/java/resources/estivateSQLite.db").build();
         Author perArne = new Author("Per Arne", "To tredjedel ved fra ORM");
         IDriverHandler driverHandler = new SQLiteDriver("src/main/java/resources/estivateSQLite.db");
-      //  driverHandler.describedTable(Author.class);
-    //    persist.persist(perArne);
-        persist.getOne(1, Author.class);
+        // driverHandler.describeTable(Author.class);
+        // persist.persist(perArne);
+        Author retrieved = persist.getOne(2, Author.class);
+        System.out.println(retrieved);
     }
 }

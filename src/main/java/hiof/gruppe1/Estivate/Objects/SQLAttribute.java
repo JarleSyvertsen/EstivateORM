@@ -7,7 +7,9 @@ public class SQLAttribute {
         this.object = object;
         this.objectClass = objectClass;
     }
-
+    public Object getDataRaw() {
+        return object;
+    }
     @SuppressWarnings("unchecked")
     public <T> T getData() {
         return (T) objectClass.cast(object);

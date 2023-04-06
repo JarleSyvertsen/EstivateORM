@@ -24,8 +24,36 @@ public class ReflectionParser implements IObjectParser {
     }
 
     public <T> T parseAttributeListToObject(Class<T> castTo, HashMap<String, SQLAttribute> attributeList) {
+        T creationObject = createClassOfType(castTo);
+        for(Method setter : creationObject.getClass().getMethods()) {
+            if(setter.getName().startsWith("set")) {
+                String setName = setter.getName().substring(3).toLowerCase();
+                try {
+                    setter.invoke(creationObject, attributeList.get(setName).getDataRaw());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return creationObject;
+    }
 
-        return null;
+    private static <T> T createClassOfType(Class<T> castTo) {
+        T creationObject;
+        try {
+            creationObject = castTo.getDeclaredConstructor().newInstance();
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        return creationObject;
     }
 
 }

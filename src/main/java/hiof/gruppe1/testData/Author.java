@@ -5,6 +5,9 @@ public class Author {
     private String name;
     private String books;
 
+    public Author() {
+    }
+
     public Author(String name, String books) {
         this.id = -1;
         this.name = name;
