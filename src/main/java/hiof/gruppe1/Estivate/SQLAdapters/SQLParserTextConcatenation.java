@@ -7,7 +7,14 @@ import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 
 import java.sql.ResultSet;
 
+
 public class SQLParserTextConcatenation implements ISQLParser {
+    private final String SELECT = "SELECT ";
+    private final String INSERT_INTO = "INSERT INTO ";
+    private final String VALUES = " VALUES ";
+    private final String WHERE = " WHERE ";
+    private final String ID_EQUALS = "id = ";
+
     IDriverHandler sqlDriver;
 
     public SQLParserTextConcatenation(IDriverHandler sqlDriver) {
@@ -25,25 +32,38 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     public <T> T readFromDatabase(Class castTo, int id) {
+        String SQLQuery = createRadableSQLString(castTo, id);
+        ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
         return null;
     }
 
+    private String createRadableSQLString(Class queryClass, int id) {
+        StringBuilder limiter = new StringBuilder();
+        limiter.append(WHERE);
+        limiter.append(ID_EQUALS);
+        limiter.append(id);
+        return createRadableSQLString(queryClass, limiter.toString());
+    }
+    private String createRadableSQLString(Class queryClass, String limiter) {
+        StringBuilder reader = new StringBuilder();
+        reader.append(SELECT);
+        reader.append(queryClass.getSimpleName());
+        reader.append(limiter != null ? reader.append(limiter) : "");
+        return reader.toString();
+    }
 
-    // Should be private, just for debugging
     private String createWritableSQLString(SQLWriteObject writeObject) {
         if(writeObject.getAttributeList().get("id").getData().toString().equals("-1")) {
          writeObject.getAttributeList().remove("id");
         }
 
-        String insertInto = "INSERT INTO ";
         String insertTable = writeObject.getAttributeList().remove("class").getInnerClass();
-        String values = " VALUES ";
 
         StringBuilder finalString = new StringBuilder();
         StringBuilder keyString = new StringBuilder();
         StringBuilder valuesString = new StringBuilder();
 
-        finalString.append(insertInto);
+        finalString.append(INSERT_INTO);
         finalString.append(insertTable);
 
         writeObject.getAttributeList().forEach((k,v) -> {
@@ -54,7 +74,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
         });
 
         createValuesInParenthesis(finalString, keyString);
-        finalString.append(values);
+        finalString.append(VALUES);
         createValuesInParenthesis(finalString, valuesString);
         finalString.append(" RETURNING id");
         return finalString.toString();
