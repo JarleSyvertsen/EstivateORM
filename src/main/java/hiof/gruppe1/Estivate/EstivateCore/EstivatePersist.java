@@ -1,25 +1,37 @@
 package hiof.gruppe1.Estivate.EstivateCore;
 
+import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
 import hiof.gruppe1.Estivate.Objects.SQLSearchQuery;
+import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.SQLParsers.ISQLParser;
 import hiof.gruppe1.Estivate.SQLParsers.SQLParserTextConcatenation;
 import hiof.gruppe1.Estivate.config.config;
+import hiof.gruppe1.Estivate.drivers.IDriverHandler;
+import hiof.gruppe1.Estivate.drivers.SQLiteDriver;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Persist serves as the main namespace, where storing of Java objects and retrieval is supported.
  */
 public class EstivatePersist {
+
     // Default, could be defined by config if multiple parsers are present.
-    private IObjectParser objectParser = new ReflectionParser();
-    private ISQLParser SQLParser = new SQLParserTextConcatenation();
-    private config WorkingConfiguration = new config();
-    private Connection connection;
+    private IObjectParser objectParser;
+    private ISQLParser SQLParser;
+    private config WorkingConfiguration;
+    private IDriverHandler sqlDriver;
+   public EstivatePersist(String relativeURL) {
+        this.objectParser  = new ReflectionParser();
+        this.SQLParser = new SQLParserTextConcatenation();
+        WorkingConfiguration  = new config();
+        this.sqlDriver = new SQLiteDriver(relativeURL);
+    }
 
     /**
      * Persist serves as the primary function to store arbitary objects to database. The object will be divided into primitives (stored in a table with the same name, unless overwritten via config), and embedded objects will be stored in their respective table, with a many-to-many relationship by default.
@@ -27,6 +39,10 @@ public class EstivatePersist {
      * @return Boolean
      */
     public Boolean persist(Object object) {
+        HashMap<String, SQLAttribute> attributes = objectParser.parseObjectToAttributeList(object);
+        SQLWriteObject writeObject = new SQLWriteObject();
+        writeObject.setAttributes(attributes);
+        System.out.println(SQLParser.parseWriteObjectToDB(writeObject));
         return true;
     }
 

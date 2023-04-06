@@ -19,12 +19,12 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
     // Should be private, just for debugging
     public String parseWriteObjectToDB(SQLWriteObject writeObject) {
-        if(writeObject.getAttributeList().get("Id").getData().toString().equals("-1")) {
-         writeObject.getAttributeList().remove("Id");
+        if(writeObject.getAttributeList().get("id").getData().toString().equals("-1")) {
+         writeObject.getAttributeList().remove("id");
         }
 
         String insertInto = "INSERT INTO ";
-        String insertTable = writeObject.getAttributeList().remove("Class").getInnerClass();
+        String insertTable = writeObject.getAttributeList().remove("class").getInnerClass();
         String values = " VALUES ";
 
         StringBuilder finalString = new StringBuilder();
