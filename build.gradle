@@ -29,6 +29,33 @@ test {
     useJUnitPlatform()
 }
 
+def DBExecutable = 'sqlite3'
+def DBPath = 'src/main/java/resources'
+def DBFile = 'estivateSQLite.db'
+def DBSQLBackup = 'estivateCleanBackup.sql'
+
+task backupDatabase(type: Exec) {
+    executable "${DBPath}/${DBExecutable}"
+    args "${DBPath}/${DBFile}",
+            ".output ${DBPath}/${DBSQLBackup}",
+            ".dump", ".exit"
+}
+
+task restoreDatabase() {
+    doFirst {
+        delete file("${DBPath}/${DBFile}")
+    }
+    doLast {
+        exec {
+            executable "${DBPath}/${DBExecutable}"
+            args "${DBPath}/${DBFile}",
+                    ".read ${DBPath}/${DBSQLBackup}",
+                    ".exit"
+        }
+    }
+}
+
+
 publishing {
     repositories {
         maven {
