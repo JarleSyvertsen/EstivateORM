@@ -3,7 +3,7 @@ package hiof.gruppe1.Estivate.SQLParsers;
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
-import hiof.gruppe1.Estivate.SQLAdapters.SQLTableManagment;
+import hiof.gruppe1.Estivate.SQLAdapters.SQLTableCalculations;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
@@ -26,12 +26,12 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     IDriverHandler sqlDriver;
     IObjectParser objectParser;
-    SQLTableManagment tableManagement;
+    SQLTableCalculations tableManagement;
 
     public SQLParserTextConcatenation(IDriverHandler sqlDriver) {
         this.sqlDriver = sqlDriver;
         this.objectParser = new ReflectionParser();
-        this.tableManagement = new SQLTableManagment(sqlDriver);
+        this.tableManagement = new SQLTableCalculations(sqlDriver);
     }
 
     public Boolean writeToDatabase(SQLMultiCommand multiCommand) {
@@ -40,7 +40,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
         if(!tableManagement.insertIsTableCorrect(writeObject)) {
-            return false;
+            tableManagement.createTable(writeObject);
         }
         String writeableString = createWritableSQLString(writeObject);
         sqlDriver.executeInsert(writeableString);

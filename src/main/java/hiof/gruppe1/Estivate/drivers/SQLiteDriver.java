@@ -33,6 +33,17 @@ public class SQLiteDriver implements IDriverHandler {
         }
         return connection;
     }
+
+    public void executeNoReturn(String query) {
+        try {
+            Connection connection = connect();
+            PreparedStatement executeStatement = connection.prepareStatement(query);
+            executeStatement.execute();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public ResultSet executeQuery(String query) {
         ResultSet rs = null;
         try {

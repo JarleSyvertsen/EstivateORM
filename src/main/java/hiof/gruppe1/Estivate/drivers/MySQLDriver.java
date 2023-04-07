@@ -22,6 +22,11 @@ public class MySQLDriver implements IDriverHandler {
     }
 
     @Override
+    public void executeNoReturn(String query) {
+
+    }
+
+    @Override
     public HashMap<String, String> describeTable(Class classOfTable) {
         return null;
     }
