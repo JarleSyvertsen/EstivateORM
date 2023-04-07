@@ -5,11 +5,17 @@ import java.sql.*;
 import java.util.HashMap;
 
 public class SQLiteDriver implements IDriverHandler {
-    String relativeURL;
+    private String relativeURL;
+    private String dialect = "sqlite";
 
     public SQLiteDriver(String relativeURL) {
         this.relativeURL = relativeURL;
     }
+
+    public String getDialect() {
+        return dialect;
+    }
+
     private Connection connect() {
         Connection connection = null;
         try {
@@ -48,10 +54,13 @@ public class SQLiteDriver implements IDriverHandler {
             throw new RuntimeException(e);
         }
     }
-
     @Override
     public HashMap<String, String> describeTable(Class classOfTable) {
-        String tableQuery = describeTableQuery(classOfTable);
+       return describeTable(classOfTable.getSimpleName());
+    }
+    @Override
+    public HashMap<String, String> describeTable(String simpleName) {
+        String tableQuery = describeTableQuery(simpleName);
         ResultSet tableResult = executeQuery(tableQuery);
 
         HashMap<String, String> tableInfo = new HashMap<>();
@@ -62,14 +71,13 @@ public class SQLiteDriver implements IDriverHandler {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-
         return tableInfo;
     }
-    private String describeTableQuery(Class classOfTable) {
+    private String describeTableQuery(String simpleName) {
         String describeTable = "SELECT * FROM pragma_table_info('";
         StringBuilder describer = new StringBuilder();
         describer.append(describeTable);
-        describer.append(classOfTable.getSimpleName());
+        describer.append(simpleName);
         describer.append("')");
         return describer.toString();
     }

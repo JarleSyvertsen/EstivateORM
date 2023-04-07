@@ -1,11 +1,14 @@
-package hiof.gruppe1.Estivate.SQLAdapters;
+package hiof.gruppe1.Estivate.SQLParsers;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
+import hiof.gruppe1.Estivate.SQLAdapters.SQLTableManagment;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
+
+import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.getCompatAttr;
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
 import java.sql.ResultSet;
@@ -23,10 +26,12 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     IDriverHandler sqlDriver;
     IObjectParser objectParser;
+    SQLTableManagment tableManagement;
 
     public SQLParserTextConcatenation(IDriverHandler sqlDriver) {
         this.sqlDriver = sqlDriver;
         this.objectParser = new ReflectionParser();
+        this.tableManagement = new SQLTableManagment(sqlDriver);
     }
 
     public Boolean writeToDatabase(SQLMultiCommand multiCommand) {
@@ -34,8 +39,11 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
+        if(!tableManagement.insertIsTableCorrect(writeObject)) {
+            return false;
+        }
         String writeableString = createWritableSQLString(writeObject);
-       sqlDriver.executeInsert(writeableString);
+        sqlDriver.executeInsert(writeableString);
         return true;
     }
 
@@ -49,9 +57,9 @@ public class SQLParserTextConcatenation implements ISQLParser {
             for (Map.Entry<String, String> entry : describedTable.entrySet()) {
                 String attributeName = entry.getKey();
                 String attributeValue = entry.getValue();
-                switch (attributeValue) {
-                    case "INTEGER" -> readAttributes.put(attributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
-                    case "TEXT" -> readAttributes.put(attributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
+                switch (getCompatAttr(attributeValue)) {
+                    case INT_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
+                    case STRING_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
                 }
             }
         } catch (Exception e) {

@@ -7,4 +7,7 @@ public interface IDriverHandler {
     public ResultSet executeQuery(String query);
     public void executeInsert(String query);
     public HashMap<String, String> describeTable(Class classOfTable);
+    public String getDialect();
+
+    HashMap<String, String> describeTable(String simpleName);
 }

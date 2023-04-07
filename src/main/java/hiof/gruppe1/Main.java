@@ -17,7 +17,7 @@ public class Main {
         Page testPage = new Page(23, "Hello");
         perArne.setFavoritePage(testPage);
         persist.persist(perArne);
-        Author retrieved = persist.getOne(4, Author.class);
-        System.out.println(retrieved);
+     //   Author retrieved = persist.getOne(4, Author.class);
+     //   System.out.println(retrieved);
     }
 }
