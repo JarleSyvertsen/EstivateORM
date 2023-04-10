@@ -39,7 +39,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
-        if(!tableManagement.insertIsTableCorrect(writeObject)) {
+         if(!tableManagement.insertIsTableCorrect(writeObject)) {
             tableManagement.createTable(writeObject);
         }
         String writeableString = createWritableSQLString(writeObject);
@@ -48,7 +48,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     public <T> T readFromDatabase(Class<T> castTo, int id) {
-        String SQLQuery = createRadableSQLString(castTo, id);
+        String SQLQuery = createReadableSQLString(castTo, id);
         HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
 
@@ -69,14 +69,14 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return objectParser.parseAttributeListToObject(castTo, readAttributes);
     }
 
-    private String createRadableSQLString(Class queryClass, int id) {
+    private String createReadableSQLString(Class queryClass, int id) {
         StringBuilder limiter = new StringBuilder();
         limiter.append(WHERE);
         limiter.append(ID_EQUALS);
         limiter.append(id);
-        return createRadableSQLString(queryClass, limiter.toString());
+        return createReadableSQLString(queryClass, limiter.toString());
     }
-    private String createRadableSQLString(Class queryClass, String limiter) {
+    private String createReadableSQLString(Class queryClass, String limiter) {
         StringBuilder reader = new StringBuilder();
         reader.append(SELECT_ALL_FROM);
         reader.append(queryClass.getSimpleName());
