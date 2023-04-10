@@ -7,6 +7,8 @@ import hiof.gruppe1.Estivate.objectBuilders.EstivateBuilder;
 import hiof.gruppe1.testData.Author;
 import hiof.gruppe1.testData.Page;
 
+import java.util.ArrayList;
+
 public class Main {
     public static void main(String[] args) {
         EstivateBuilder estivateBuilder = new EstivateBuilder();
@@ -17,7 +19,7 @@ public class Main {
         Page testPage = new Page(23, "Hello");
         perArne.setFavoritePage(testPage);
         persist.persist(perArne);
-     //   Author retrieved = persist.getOne(4, Author.class);
-     //   System.out.println(retrieved);
+        ArrayList<Author> authors = persist.getAll(Author.class);
+        System.out.println(authors);
     }
 }

@@ -12,6 +12,8 @@ import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.get
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +41,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
-         if(!tableManagement.insertIsTableCorrect(writeObject)) {
+        if (!tableManagement.insertIsTableCorrect(writeObject)) {
             tableManagement.createTable(writeObject);
         }
         String writeableString = createWritableSQLString(writeObject);
@@ -52,21 +54,25 @@ public class SQLParserTextConcatenation implements ISQLParser {
         HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
 
-        HashMap<String,SQLAttribute> readAttributes = new HashMap<>();
+        HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
+        return objectParser.parseAttributeListToObject(castTo, readAttributes);
+    }
+
+    public <T> ArrayList<T> readFromDatabase(Class<T> castTo) {
+        String SQLQuery = createReadableSQLString(castTo);
+        HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
+        ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
+
+        ArrayList<T> arrayOfObjects = new ArrayList<>();
         try {
-            for (Map.Entry<String, String> entry : describedTable.entrySet()) {
-                String attributeName = entry.getKey();
-                String attributeValue = entry.getValue();
-                switch (getCompatAttr(attributeValue)) {
-                    case INT_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
-                    case STRING_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
-                }
+            while (querySet.next()) {
+                T object = objectParser.parseAttributeListToObject(castTo, getAttributeMap(describedTable, querySet));
+                arrayOfObjects.add(object);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        return objectParser.parseAttributeListToObject(castTo, readAttributes);
+        return arrayOfObjects;
     }
 
     private String createReadableSQLString(Class queryClass, int id) {
@@ -76,6 +82,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
         limiter.append(id);
         return createReadableSQLString(queryClass, limiter.toString());
     }
+
     private String createReadableSQLString(Class queryClass, String limiter) {
         StringBuilder reader = new StringBuilder();
         reader.append(SELECT_ALL_FROM);
@@ -84,9 +91,16 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return reader.toString();
     }
 
+    private String createReadableSQLString(Class queryClass) {
+        StringBuilder reader = new StringBuilder();
+        reader.append(SELECT_ALL_FROM);
+        reader.append(queryClass.getSimpleName());
+        return reader.toString();
+    }
+
     private String createWritableSQLString(SQLWriteObject writeObject) {
-        if(writeObject.getAttributeList().get("id").getData().toString().equals("-1")) {
-         writeObject.getAttributeList().remove("id");
+        if (writeObject.getAttributeList().get("id").getData().toString().equals("-1")) {
+            writeObject.getAttributeList().remove("id");
         }
         String insertTable = writeObject.getAttributeList().remove("class").getInnerClass();
 
@@ -101,7 +115,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
         // Appends
         finalString.append(INSERT_INTO);
         finalString.append(insertTable);
-        writeObject.getAttributeList().forEach((k,v) -> {
+        writeObject.getAttributeList().forEach((k, v) -> {
             keyString.append(k);
             keyString.append(",");
             valuesString.append(createWritableValue(v));
@@ -112,7 +126,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
         finalString.append(VALUES);
         createValuesInParenthesis(finalString, valuesString);
         finalString.append(" RETURNING id");
-     //   finalString.append(recursiveAdds);
+        //   finalString.append(recursiveAdds);
 
         return finalString.toString();
     }
@@ -120,7 +134,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     private StringBuilder traverseNonPrimitives(SQLWriteObject writeObject) {
         StringBuilder recursiveAdds = new StringBuilder();
         writeObject.getAttributeList().forEach((k, v) -> {
-            if(!isSimple(v.getData().getClass())) {
+            if (!isSimple(v.getData().getClass())) {
                 HashMap<String, SQLAttribute> parsedAttributes = objectParser.parseObjectToAttributeList(v.getDataRaw());
                 SQLWriteObject recursiveObject = new SQLWriteObject(parsedAttributes);
                 recursiveAdds.append(" ");
@@ -138,10 +152,30 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     private String createWritableValue(SQLAttribute sqlAttr) {
-        if(sqlAttr.getData().getClass().getSimpleName().equals("String")) {
+        if (sqlAttr.getData().getClass().getSimpleName().equals("String")) {
             return String.format("\"%s\"", sqlAttr.getData().toString());
         }
         return sqlAttr.getData().toString();
     }
+
+    private static HashMap<String, SQLAttribute> getAttributeMap(HashMap<String, String> describedTable, ResultSet querySet) {
+        HashMap<String, SQLAttribute> readAttributes = new HashMap<>();
+        try {
+            for (Map.Entry<String, String> entry : describedTable.entrySet()) {
+                String attributeName = entry.getKey();
+                String attributeValue = entry.getValue();
+                switch (getCompatAttr(attributeValue)) {
+                    case INT_COMPAT ->
+                            readAttributes.put(attributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
+                    case STRING_COMPAT ->
+                            readAttributes.put(attributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return readAttributes;
+    }
+
 
 }

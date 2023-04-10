@@ -63,7 +63,7 @@ public class EstivatePersist {
      * @param <T>
      */
     public <T> ArrayList<T> getAll(Class<T> output) {
-        return null;
+        return SQLParser.readFromDatabase(output);
     }
 
     /**
