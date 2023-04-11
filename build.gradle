@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'hiof.gruppe1'
-version '1.0-SNAPSHOT'
+version '0.24'
 
 repositories {
     mavenCentral()
@@ -18,8 +18,8 @@ task run(type: JavaExec) {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+  //  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+  //  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     implementation 'org.mariuszgromada.math:MathParser.org-mXparser:5.2.1'
     implementation 'mysql:mysql-connector-java:8.0.32'
     implementation 'org.xerial:sqlite-jdbc:3.39.3.0'
@@ -60,7 +60,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/JarleSyvertsen/estivateORM")
+            url = uri("https://maven.pkg.github.com/jarlesyvertsen/estivateorm")
             credentials {
                 username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
                 password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
@@ -68,16 +68,11 @@ publishing {
         }
     }
     publications {
-        maven(MavenPublication) {
-            groupId = 'hiof.rammeverk.gruppe1'
-            artifactId = 'estivate'
-            version = "0.2-Test"
-            from components.java
-
-            pom {
-                name = 'Estivate ORM'
-                description = 'A mySQL library for storing and retrieving Java objects.'
-            }
+        gpr(MavenPublication) {
+            groupId = 'hiof.gruppe1'
+            artifactId = 'estivate-persist'
+            version = "0.24"
+            from (components.java)
         }
     }
 }

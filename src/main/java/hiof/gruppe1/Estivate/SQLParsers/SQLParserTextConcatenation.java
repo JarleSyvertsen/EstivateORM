@@ -165,10 +165,12 @@ public class SQLParserTextConcatenation implements ISQLParser {
                 String attributeName = entry.getKey();
                 String attributeValue = entry.getValue();
                 switch (getCompatAttr(attributeValue)) {
-                    case INT_COMPAT ->
+                    case INT_COMPAT:
                             readAttributes.put(attributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
-                    case STRING_COMPAT ->
+                            break;
+                    case STRING_COMPAT:
                             readAttributes.put(attributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
+                            break;
                 }
             }
         } catch (Exception e) {
