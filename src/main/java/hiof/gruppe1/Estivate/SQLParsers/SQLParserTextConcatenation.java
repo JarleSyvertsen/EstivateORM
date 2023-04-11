@@ -99,7 +99,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     private String createWritableSQLString(SQLWriteObject writeObject) {
-        if (writeObject.getAttributeList().get("id").getData().toString().equals("-1")) {
+        if (writeObject.getAttributeList().get("id").getData().toString().equals("0")) {
             writeObject.getAttributeList().remove("id");
         }
         String insertTable = writeObject.getAttributeList().remove("class").getInnerClass();
