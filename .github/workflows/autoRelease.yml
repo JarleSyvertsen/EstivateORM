@@ -8,6 +8,7 @@ on:
 
 jobs:
   pre-release:
+    permissions: write-all
     name: "Auto-release"
     runs-on: "ubuntu-latest"
 
