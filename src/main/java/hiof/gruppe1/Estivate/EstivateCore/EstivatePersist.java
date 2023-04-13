@@ -24,9 +24,10 @@ public class EstivatePersist {
     private ISQLParser SQLParser;
     private config WorkingConfiguration;
     private IDriverHandler sqlDriver;
-   public EstivatePersist(String relativeURL) {
+
+    public EstivatePersist(String relativeURL, Boolean debug) {
         this.objectParser  = new ReflectionParser();
-        this.sqlDriver = new SQLiteDriver(relativeURL);
+        this.sqlDriver = new SQLiteDriver(relativeURL, debug);
         this.SQLParser = new SQLParserTextConcatenation(sqlDriver);
         WorkingConfiguration  = new config();
     }

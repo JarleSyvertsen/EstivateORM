@@ -19,6 +19,7 @@ import java.util.Map;
 
 
 public class SQLParserTextConcatenation implements ISQLParser {
+    private Boolean debug;
     private final String SELECT = "SELECT ";
     private final String SELECT_ALL_FROM = "SELECT * FROM ";
     private final String INSERT_INTO = "INSERT INTO ";
@@ -45,9 +46,11 @@ public class SQLParserTextConcatenation implements ISQLParser {
             tableManagement.createTable(writeObject);
         }
         String writeableString = createWritableSQLString(writeObject);
+
         sqlDriver.executeInsert(writeableString);
         return true;
     }
+
 
     public <T> T readFromDatabase(Class<T> castTo, int id) {
         String SQLQuery = createReadableSQLString(castTo, id);

@@ -7,9 +7,10 @@ import java.util.HashMap;
 public class SQLiteDriver implements IDriverHandler {
     private String relativeURL;
     private String dialect = "sqlite";
-
-    public SQLiteDriver(String relativeURL) {
+    private Boolean debug = false;
+    public SQLiteDriver(String relativeURL, Boolean debug) {
         this.relativeURL = relativeURL;
+        this.debug = debug;
     }
 
     public String getDialect() {
@@ -35,6 +36,11 @@ public class SQLiteDriver implements IDriverHandler {
     }
 
     public void executeNoReturn(String query) {
+        if(debug) {
+            System.out.println(query);
+            return;
+        }
+
         try {
             Connection connection = connect();
             PreparedStatement executeStatement = connection.prepareStatement(query);
@@ -46,9 +52,17 @@ public class SQLiteDriver implements IDriverHandler {
 
     public ResultSet executeQuery(String query) {
         ResultSet rs = null;
+        String executingQuery = query;
+        // Creating an empty rs is non-trivial, we instead rely on an empty search
+        // Though in practice, this should be handled without hitting the database.
+        if(debug) {
+            System.out.println(query);
+            executingQuery = "SELECT 1 WHERE false";
+        }
+
         try {
             Connection connection = connect();
-            PreparedStatement selectStatement = connection.prepareStatement(query);
+            PreparedStatement selectStatement = connection.prepareStatement(executingQuery);
             rs = selectStatement.executeQuery();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -58,6 +72,11 @@ public class SQLiteDriver implements IDriverHandler {
 
     @Override
     public void executeInsert(String query) {
+        if(debug) {
+            System.out.println(query);
+            return;
+        }
+
         ResultSet closingStatement = executeQuery(query);
         try {
             closingStatement.close();

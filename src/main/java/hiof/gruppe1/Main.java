@@ -12,14 +12,16 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String[] args) {
         EstivateBuilder estivateBuilder = new EstivateBuilder();
-        EstivatePersist persist = estivateBuilder.setDBUrl("src/main/java/resources/estivateSQLite.db").build();
+        EstivatePersist persist = estivateBuilder.
+                setDBUrl("src/main/java/resources/estivateSQLite.db")
+                .setDebug(true)
+                .build();
         Author perArne = new Author("Per Arne", "To tredjedel ved fra ORM");
-        IDriverHandler driverHandler = new SQLiteDriver("src/main/java/resources/estivateSQLite.db");
-        driverHandler.describeTable(Author.class);
         Page testPage = new Page(23, "Hello");
         perArne.setFavoritePage(testPage);
         persist.persist(perArne);
         ArrayList<Author> authors = persist.getAll(Author.class);
+        Author perArne2 = persist.getOne(1, Author.class);
         System.out.println(authors);
     }
 }

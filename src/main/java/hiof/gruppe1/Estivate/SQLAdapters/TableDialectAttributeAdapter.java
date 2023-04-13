@@ -12,17 +12,17 @@ public class TableDialectAttributeAdapter {
         FLOAT_COMPAT
     }
 
-    private static HashMap<String, SQLJavaAttr> SQLAttrToGeneric = populateEnumsAsKeys();
-    private static HashMap<Class, String> JavaClassToSQLite = populateSQLiteAsKeys();
+    private static HashMap<String, SQLJavaAttr> SQLAttrToGeneric = populateEnumsAsValues();
+    private static HashMap<Class, String> JavaClassToSQLite = populateClassToSQLite();
 
-    private static HashMap<Class, String> populateSQLiteAsKeys() {
+    private static HashMap<Class, String> populateClassToSQLite() {
         HashMap<Class, String> SQLiteKeys = new HashMap<>();
         SQLiteKeys.put(String.class, "TEXT");
         SQLiteKeys.put(Integer.class, "INTEGER");
         return SQLiteKeys;
     }
 
-    private static HashMap<String, SQLJavaAttr> populateEnumsAsKeys() {
+    private static HashMap<String, SQLJavaAttr> populateEnumsAsValues() {
         HashMap<String, SQLJavaAttr> SQLAttrAsKey = new HashMap<>();
         SQLAttrAsKey.put("TEXT", SQLJavaAttr.STRING_COMPAT);
         SQLAttrAsKey.put("INTEGER", SQLJavaAttr.INT_COMPAT);

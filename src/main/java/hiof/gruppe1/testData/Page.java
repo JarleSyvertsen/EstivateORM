@@ -9,7 +9,6 @@ public class Page {
     }
 
     public Page(int pageNr, String text) {
-        this.id = -1;
         this.pageNr = pageNr;
         this.text = text;
     }
