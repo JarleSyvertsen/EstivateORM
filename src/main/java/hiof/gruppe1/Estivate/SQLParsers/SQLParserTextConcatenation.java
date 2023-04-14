@@ -19,7 +19,6 @@ import java.util.Map;
 
 
 public class SQLParserTextConcatenation implements ISQLParser {
-    private Boolean debug;
     private final String SELECT = "SELECT ";
     private final String SELECT_ALL_FROM = "SELECT * FROM ";
     private final String INSERT_INTO = "INSERT INTO ";
@@ -42,11 +41,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
-        if (!tableManagement.insertIsTableCorrect(writeObject)) {
-            tableManagement.createTable(writeObject);
-        }
         String writeableString = createWritableSQLString(writeObject);
-
         sqlDriver.executeInsert(writeableString);
         return true;
     }
@@ -102,16 +97,22 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     private String createWritableSQLString(SQLWriteObject writeObject) {
+        if (!tableManagement.insertIsTableCorrect(writeObject)) {
+            tableManagement.createTable(writeObject);
+        }
+
         if (writeObject.getAttributeList().get("id").getData().toString().equals("0")) {
             writeObject.getAttributeList().remove("id");
         }
-        String insertTable = writeObject.getAttributeList().remove("class").getInnerClass();
+
+        String insertTable = getObjectClass(writeObject);
+        writeObject.getAttributeList().remove("class");
 
         // PartBuilders to allow building the String in a non-linear way.
         StringBuilder finalString = new StringBuilder();
         StringBuilder keyString = new StringBuilder();
         StringBuilder valuesString = new StringBuilder();
-        StringBuilder recursiveAdds = traverseNonPrimitives(writeObject);
+        StringBuilder recursiveAdds = traverseNonPrimitives(writeObject, insertTable);
         // Remove the complex objects after parsing.
         writeObject.getAttributeList().entrySet().removeIf(entry -> !isSimple(entry.getValue().getData().getClass()));
 
@@ -128,19 +129,28 @@ public class SQLParserTextConcatenation implements ISQLParser {
         createValuesInParenthesis(finalString, keyString);
         finalString.append(VALUES);
         createValuesInParenthesis(finalString, valuesString);
-        finalString.append(" RETURNING id");
-        //   finalString.append(recursiveAdds);
+        // finalString.append(" RETURNING id");
+        finalString.append(recursiveAdds);
 
         return finalString.toString();
     }
 
-    private StringBuilder traverseNonPrimitives(SQLWriteObject writeObject) {
+    private static String getObjectClass(SQLWriteObject writeObject) {
+        return writeObject.getAttributeList().get("class").getInnerClass();
+    }
+
+    private StringBuilder traverseNonPrimitives(SQLWriteObject writeObject, String parentClass) {
         StringBuilder recursiveAdds = new StringBuilder();
+
         writeObject.getAttributeList().forEach((k, v) -> {
             if (!isSimple(v.getData().getClass())) {
                 HashMap<String, SQLAttribute> parsedAttributes = objectParser.parseObjectToAttributeList(v.getDataRaw());
                 SQLWriteObject recursiveObject = new SQLWriteObject(parsedAttributes);
-                recursiveAdds.append(" ");
+                String appendingTable = tableManagement.doesRelationExist(parentClass, getObjectClass(recursiveObject)) ?
+                        tableManagement.createJoiningSyntax(parentClass, getObjectClass(recursiveObject)) : "";
+                recursiveAdds.append("\n");
+                recursiveAdds.append(appendingTable);
+                recursiveAdds.append("\n");
                 recursiveAdds.append(createWritableSQLString(recursiveObject));
             }
         });

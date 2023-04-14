@@ -20,8 +20,5 @@ public class Main {
         Page testPage = new Page(23, "Hello");
         perArne.setFavoritePage(testPage);
         persist.persist(perArne);
-        ArrayList<Author> authors = persist.getAll(Author.class);
-        Author perArne2 = persist.getOne(1, Author.class);
-        System.out.println(authors);
     }
 }
