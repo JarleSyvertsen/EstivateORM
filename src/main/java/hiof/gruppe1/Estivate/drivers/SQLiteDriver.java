@@ -33,8 +33,8 @@ public class SQLiteDriver implements IDriverHandler {
             // This is to no massively complicate the code with calculating the most optimal
             // action, and instead recreating objects when needed.
 
-            // Statement respectConstraints = connection.createStatement();
-            // respectConstraints.executeUpdate("PRAGMA foreign_keys = ON;");
+            Statement respectConstraints = connection.createStatement();
+            respectConstraints.executeUpdate("PRAGMA foreign_keys = ON;");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -78,20 +78,6 @@ public class SQLiteDriver implements IDriverHandler {
             System.out.println(e.getMessage());
         }
         return rs;
-    }
-
-    @Override
-    public void executeInsert(String query) {
-        if(debug) {
-            System.out.println("query: \n" + query);
-            return;
-        }
-        ResultSet closingStatement = executeQuery(query);
-        try {
-            closingStatement.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
     @Override
     public HashMap<String, String> describeTable(Class classOfTable) {

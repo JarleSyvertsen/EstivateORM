@@ -62,7 +62,7 @@ public class SQLTableCalculations {
         });
 
         idMap.forEach((k,v) -> {
-            foreignKeys.append(String.format(" FOREIGN KEY (%s) REFERENCES %s (%s)", k, k.toLowerCase(), "id"));
+            foreignKeys.append(String.format(" FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE CASCADE", k, k.toLowerCase(), "id"));
         });
 
         joiningString.append(CREATE_TABLE);
