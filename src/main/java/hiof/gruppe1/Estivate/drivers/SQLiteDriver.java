@@ -27,8 +27,14 @@ public class SQLiteDriver implements IDriverHandler {
 
             // JDBC ignores certain constrains as default for backwards compatability,
             // we explicitly opt into foreign key constrains for all DB functions.
-            Statement respectConstraints = connection.createStatement();
-            respectConstraints.executeUpdate("PRAGMA foreign_keys = ON;");
+
+            // To allow replacing values in spot, constraints are used as default
+            // Proper usage would probably be introducing cascading deletes while replacing
+            // This is to no massively complicate the code with calculating the most optimal
+            // action, and instead recreating objects when needed.
+
+            // Statement respectConstraints = connection.createStatement();
+            // respectConstraints.executeUpdate("PRAGMA foreign_keys = ON;");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }

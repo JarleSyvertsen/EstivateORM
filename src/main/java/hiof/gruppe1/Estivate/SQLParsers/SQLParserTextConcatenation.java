@@ -22,7 +22,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     private final String SELECT = "SELECT ";
     private final String FROM = "FROM ";
     private final String SELECT_ALL_FROM = "SELECT * FROM ";
-    private final String INSERT_INTO = "INSERT INTO ";
+    private final String INSERT_INTO = "INSERT OR REPLACE INTO ";
     private final String VALUES = " VALUES ";
     private final String WHERE = " WHERE ";
     private final String ID_EQUALS = "id = ";
