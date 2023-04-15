@@ -20,11 +20,14 @@ import java.util.Map;
 
 public class SQLParserTextConcatenation implements ISQLParser {
     private final String SELECT = "SELECT ";
+    private final String FROM = "FROM ";
     private final String SELECT_ALL_FROM = "SELECT * FROM ";
     private final String INSERT_INTO = "INSERT INTO ";
     private final String VALUES = " VALUES ";
     private final String WHERE = " WHERE ";
     private final String ID_EQUALS = "id = ";
+    private final String SET_PARENT = "\nUPDATE tempRelations SET parent = last_insert_rowid();";
+    private final String SET_CHILD = "\nUPDATE tempRelations SET child = last_insert_rowid();";
 
     IDriverHandler sqlDriver;
     IObjectParser objectParser;
@@ -36,16 +39,19 @@ public class SQLParserTextConcatenation implements ISQLParser {
         this.tableManagement = new SQLTableCalculations(sqlDriver);
     }
 
+    public static String getObjectClass(SQLWriteObject writeObject) {
+        return writeObject.getAttributeList().get("class").getInnerClass();
+    }
+
     public Boolean writeToDatabase(SQLMultiCommand multiCommand) {
         return false;
     }
 
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
         String writeableString = createWritableSQLString(writeObject);
-        sqlDriver.executeInsert(writeableString);
+        sqlDriver.executeNoReturnSplit(writeableString);
         return true;
     }
-
 
     public <T> T readFromDatabase(Class<T> castTo, int id) {
         String SQLQuery = createReadableSQLString(castTo, id);
@@ -116,9 +122,16 @@ public class SQLParserTextConcatenation implements ISQLParser {
         // Remove the complex objects after parsing.
         writeObject.getAttributeList().entrySet().removeIf(entry -> !isSimple(entry.getValue().getData().getClass()));
 
+        if(!recursiveAdds.isEmpty()) {
+            String TEMP_JOINING_TABLE = "CREATE TEMP TABLE IF NOT EXISTS tempRelations (Id PRIMARY KEY, parent INTEGER, child INTEGER); \n" +
+                    "INSERT OR IGNORE INTO tempRelations VALUES (0,0,0); \n";
+            finalString.append(TEMP_JOINING_TABLE);
+        }
+
         // Appends
         finalString.append(INSERT_INTO);
         finalString.append(insertTable);
+
         writeObject.getAttributeList().forEach((k, v) -> {
             keyString.append(k);
             keyString.append(",");
@@ -126,17 +139,16 @@ public class SQLParserTextConcatenation implements ISQLParser {
             valuesString.append(",");
         });
 
-        createValuesInParenthesis(finalString, keyString);
+        finalString.append(createValuesInParenthesis(keyString));
         finalString.append(VALUES);
-        createValuesInParenthesis(finalString, valuesString);
-        // finalString.append(" RETURNING id");
+        finalString.append(createValuesInParenthesis(valuesString));
+        finalString.append(";");
+        if(!recursiveAdds.isEmpty()) {
+            finalString.append(SET_PARENT);
+        }
         finalString.append(recursiveAdds);
 
         return finalString.toString();
-    }
-
-    private static String getObjectClass(SQLWriteObject writeObject) {
-        return writeObject.getAttributeList().get("class").getInnerClass();
     }
 
     private StringBuilder traverseNonPrimitives(SQLWriteObject writeObject, String parentClass) {
@@ -145,23 +157,63 @@ public class SQLParserTextConcatenation implements ISQLParser {
         writeObject.getAttributeList().forEach((k, v) -> {
             if (!isSimple(v.getData().getClass())) {
                 HashMap<String, SQLAttribute> parsedAttributes = objectParser.parseObjectToAttributeList(v.getDataRaw());
+
                 SQLWriteObject recursiveObject = new SQLWriteObject(parsedAttributes);
-                String appendingTable = tableManagement.doesRelationExist(parentClass, getObjectClass(recursiveObject)) ?
-                        tableManagement.createJoiningSyntax(parentClass, getObjectClass(recursiveObject)) : "";
+                String recursiveRelationship = createRelationshipInsert(parentClass, getObjectClass(recursiveObject));
+                String appendingTable = tableManagement.createAppendingTableIfMissing(parentClass, recursiveObject);
+
                 recursiveAdds.append("\n");
                 recursiveAdds.append(appendingTable);
                 recursiveAdds.append("\n");
                 recursiveAdds.append(createWritableSQLString(recursiveObject));
+                recursiveAdds.append(SET_CHILD);
+                recursiveAdds.append(recursiveRelationship);
             }
         });
         return recursiveAdds;
     }
 
-    private static void createValuesInParenthesis(StringBuilder finalString, StringBuilder keyString) {
+    private String createRelationshipInsert(String parentId, String childId) {
+        StringBuilder relationshipInsert = new StringBuilder();
+        StringBuilder keys = new StringBuilder();
+        keys.append(parentId);
+        keys.append(",");
+        keys.append(childId);
+        keys.append(" ");
+
+        relationshipInsert.append("\n");
+        relationshipInsert.append(INSERT_INTO);
+        relationshipInsert.append(parentId);
+        relationshipInsert.append("_has_");
+        relationshipInsert.append(childId);
+        relationshipInsert.append(createValuesInParenthesis(keys));
+        relationshipInsert.append(" ");
+        relationshipInsert.append(SELECT);
+        relationshipInsert.append("parent");
+        relationshipInsert.append(",");
+        relationshipInsert.append("child ");
+        relationshipInsert.append(FROM);
+        relationshipInsert.append("tempRelations");
+
+        return relationshipInsert.toString();
+    }
+
+
+    private String createValuesInParenthesis(StringBuilder keyString) {
+        StringBuilder finalString = new StringBuilder();
         finalString.append("(");
         finalString.append(keyString);
         finalString.deleteCharAt(finalString.length() - 1);
         finalString.append(")");
+        return finalString.toString();
+    }
+
+    private static String formatLevelParent(int level) {
+        return String.format("level_%d_parent", level);
+    }
+
+    private static String formatLevelReference(int level) {
+        return String.format("level_%d_id", level);
     }
 
     private String createWritableValue(SQLAttribute sqlAttr) {

@@ -35,16 +35,20 @@ public class SQLiteDriver implements IDriverHandler {
         return connection;
     }
 
-    public void executeNoReturn(String query) {
+    public void executeNoReturnSplit(String query) {
         if(debug) {
-            System.out.println(query);
+            System.out.println("query: \n" + query);
             return;
         }
 
+        String[] splitQuery = query.split(";");
+
         try {
             Connection connection = connect();
-            PreparedStatement executeStatement = connection.prepareStatement(query);
-            executeStatement.execute();
+            for(String semicolonSeparatedQuery : splitQuery) {
+                PreparedStatement executeStatement = connection.prepareStatement(semicolonSeparatedQuery);
+                executeStatement.execute();
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -56,7 +60,7 @@ public class SQLiteDriver implements IDriverHandler {
         // Creating an empty rs is non-trivial, we instead rely on an empty search
         // Though in practice, this should be handled without hitting the database.
         if(debug) {
-            System.out.println(query);
+            System.out.println("query: \n" + query);
             executingQuery = "SELECT 1 WHERE false";
         }
 
@@ -73,10 +77,9 @@ public class SQLiteDriver implements IDriverHandler {
     @Override
     public void executeInsert(String query) {
         if(debug) {
-            System.out.println(query);
+            System.out.println("query: \n" + query);
             return;
         }
-
         ResultSet closingStatement = executeQuery(query);
         try {
             closingStatement.close();

@@ -6,12 +6,12 @@ import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import java.util.HashMap;
 
 import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.convertToSQLDialect;
+import static hiof.gruppe1.Estivate.SQLParsers.SQLParserTextConcatenation.getObjectClass;
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
 public class SQLTableCalculations {
     IDriverHandler driver;
-    String CREATE_TABLE = "CREATE TABLE ";
-
+    private String CREATE_TABLE = "CREATE TABLE ";
 
     public SQLTableCalculations(IDriverHandler driver) {
         this.driver = driver;
@@ -27,6 +27,11 @@ public class SQLTableCalculations {
         return writeObjectDescription;
     }
 
+    public String createAppendingTableIfMissing(String parentClass, SQLWriteObject recursiveObject) {
+        return doesRelationExist(parentClass, getObjectClass(recursiveObject)) ?
+                createJoiningSyntax(parentClass, getObjectClass(recursiveObject)) : "";
+    }
+
     public Boolean doesRelationExist(String parentId, String childId) {
        String relationName = String.format("%s_has_%s", parentId, childId);
        return driver.describeTable(relationName).isEmpty();
@@ -38,11 +43,10 @@ public class SQLTableCalculations {
         return SQLDescription.equals(writeObjectDescription);
     }
 
-    public Boolean createTable(SQLWriteObject ObjectToTable) {
+    public void createTable(SQLWriteObject ObjectToTable) {
         String tableName = ObjectToTable.getAttributeList().get("class").getInnerClass();
         String createQuery = createTableQuery(getWriteDescription(ObjectToTable), tableName);
-        driver.executeNoReturn(createQuery);
-        return true;
+        driver.executeNoReturnSplit(createQuery);
     }
 
     public String createJoiningSyntax(String parentId, String childId) {
@@ -60,7 +64,6 @@ public class SQLTableCalculations {
         idMap.forEach((k,v) -> {
             foreignKeys.append(String.format(" FOREIGN KEY (%s) REFERENCES %s (%s)", k, k.toLowerCase(), "id"));
         });
-
 
         joiningString.append(CREATE_TABLE);
         joiningString.append(parentId);

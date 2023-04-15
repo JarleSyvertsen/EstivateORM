@@ -22,7 +22,7 @@ public class MySQLDriver implements IDriverHandler {
     }
 
     @Override
-    public void executeNoReturn(String query) {
+    public void executeNoReturnSplit(String query) {
 
     }
 
