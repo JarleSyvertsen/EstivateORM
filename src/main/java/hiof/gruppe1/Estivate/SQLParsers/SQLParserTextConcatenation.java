@@ -29,9 +29,9 @@ public class SQLParserTextConcatenation implements ISQLParser {
     private final String SET_PARENT = "\nUPDATE tempRelations SET parent = last_insert_rowid();";
     private final String SET_CHILD = "\nUPDATE tempRelations SET child = last_insert_rowid();";
 
-    IDriverHandler sqlDriver;
-    IObjectParser objectParser;
-    SQLTableCalculations tableManagement;
+    private final IDriverHandler sqlDriver;
+    private final IObjectParser objectParser;
+    private final SQLTableCalculations tableManagement;
 
     public SQLParserTextConcatenation(IDriverHandler sqlDriver) {
         this.sqlDriver = sqlDriver;
@@ -56,21 +56,24 @@ public class SQLParserTextConcatenation implements ISQLParser {
     public <T> T readFromDatabase(Class<T> castTo, int id) {
         String SQLQuery = createReadableSQLString(castTo, id);
         HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
+        ArrayList<String> relatedTables = tableManagement.getRelatedTables(castTo.getSimpleName());
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
 
-        HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
+        HashMap<String, SQLAttribute> readAttributes = getAttributeMap(castTo, relatedTables, describedTable, querySet);
         return objectParser.parseAttributeListToObject(castTo, readAttributes);
     }
 
     public <T> ArrayList<T> readFromDatabase(Class<T> castTo) {
         String SQLQuery = createReadableSQLString(castTo);
         HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
+        ArrayList<String> relatedTables = tableManagement.getRelatedTables(castTo.getSimpleName());
+
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
 
         ArrayList<T> arrayOfObjects = new ArrayList<>();
         try {
             while (querySet.next()) {
-                T object = objectParser.parseAttributeListToObject(castTo, getAttributeMap(describedTable, querySet));
+                T object = objectParser.parseAttributeListToObject(castTo, getAttributeMap(castTo, relatedTables, describedTable, querySet));
                 arrayOfObjects.add(object);
             }
         } catch (SQLException e) {
@@ -92,6 +95,8 @@ public class SQLParserTextConcatenation implements ISQLParser {
         reader.append(SELECT_ALL_FROM);
         reader.append(queryClass.getSimpleName());
         reader.append(limiter != null ? limiter : "");
+
+
         return reader.toString();
     }
 
@@ -99,7 +104,13 @@ public class SQLParserTextConcatenation implements ISQLParser {
         StringBuilder reader = new StringBuilder();
         reader.append(SELECT_ALL_FROM);
         reader.append(queryClass.getSimpleName());
+        reader.append(" ");
+        reader.append(tableManagement.createJoiningTables(queryClass.getSimpleName()));
         return reader.toString();
+    }
+
+    private String addJoins(Class queryClass) {
+        return null;
     }
 
     private String createWritableSQLString(SQLWriteObject writeObject) {
@@ -208,14 +219,6 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return finalString.toString();
     }
 
-    private static String formatLevelParent(int level) {
-        return String.format("level_%d_parent", level);
-    }
-
-    private static String formatLevelReference(int level) {
-        return String.format("level_%d_id", level);
-    }
-
     private String createWritableValue(SQLAttribute sqlAttr) {
         if (sqlAttr.getData().getClass().getSimpleName().equals("String")) {
             return String.format("\"%s\"", sqlAttr.getData().toString());
@@ -225,6 +228,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     private static HashMap<String, SQLAttribute> getAttributeMap(HashMap<String, String> describedTable, ResultSet querySet) {
         HashMap<String, SQLAttribute> readAttributes = new HashMap<>();
+
         try {
             for (Map.Entry<String, String> entry : describedTable.entrySet()) {
                 String attributeName = entry.getKey();
@@ -237,8 +241,25 @@ public class SQLParserTextConcatenation implements ISQLParser {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
         return readAttributes;
     }
 
+    private HashMap<String, SQLAttribute> getAttributeMap(Class topLevelCast, ArrayList<String> RelatedTables, HashMap<String, String> describedTable, ResultSet querySet) {
+        HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
+        for(String relatedTable : RelatedTables) {
+            HashMap<String, SQLAttribute> subElementMap = getAttributeMap(sqlDriver.describeTable(relatedTable), querySet);
+            try {
+                String topLevelCastingElement = topLevelCast.getName();
+                String fullPath = topLevelCastingElement.substring(0, topLevelCastingElement.lastIndexOf(".") + 1);
+                Class<?> castingClass = Class.forName(fullPath + relatedTable);
+                readAttributes.put(relatedTable.toLowerCase(), new SQLAttribute(castingClass,objectParser.parseAttributeListToObject(castingClass, subElementMap)));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+        return readAttributes;
+    }
 
 }
