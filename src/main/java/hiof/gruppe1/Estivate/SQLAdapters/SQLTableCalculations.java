@@ -3,6 +3,9 @@ package hiof.gruppe1.Estivate.SQLAdapters;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.convertToSQLDialect;
@@ -12,7 +15,18 @@ import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 public class SQLTableCalculations {
     IDriverHandler driver;
     private String CREATE_TABLE = "CREATE TABLE ";
-
+    private String SELECT_FROM_SCHEMA = "SELECT name FROM sqlite_schema ";
+    private String WHERE = "WHERE ";
+    private String LIKE = "LIKE ";
+    private String NOT_LIKE = "NOT LIKE ";
+    private String AND = "AND ";
+    private String NAME = "name ";
+    private String INNER_JOIN = "INNER JOIN ";
+    private String ON = " ON ";
+    private String EQUALS =  " = ";
+    private String PERIOD = ".";
+    private String ID = "id";
+    private String NEW_LINE = "\n";
     public SQLTableCalculations(IDriverHandler driver) {
         this.driver = driver;
     }
@@ -101,7 +115,68 @@ public class SQLTableCalculations {
 
         return query.toString();
     }
+    private ArrayList<String> getRelatingTables(String className) {
+        ArrayList<String> relatedTables = new ArrayList<>();
 
+        StringBuilder selectRelatedTables = new StringBuilder();
+        selectRelatedTables.append(SELECT_FROM_SCHEMA);
+        selectRelatedTables.append(WHERE);
+        selectRelatedTables.append(NAME);
+        selectRelatedTables.append(LIKE);
+        selectRelatedTables.append(String.format("'%s%%'", className));
+        selectRelatedTables.append(AND);
+        selectRelatedTables.append(NAME);
+        selectRelatedTables.append(NOT_LIKE);
+        selectRelatedTables.append(String.format("'%s'", className));
+
+        ResultSet resultSet = driver.executeQuery(selectRelatedTables.toString());
+        try {
+            while (resultSet.next()) {
+                relatedTables.add(resultSet.getString("name"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return relatedTables;
+    }
+    public ArrayList<String> getRelatedTables(String className) {
+        ArrayList<String> referencedTables = new ArrayList<>();
+        getRelatingTables(className).forEach((referenceTable) -> referencedTables.add(referenceTable.substring(referenceTable.lastIndexOf("_") + 1)));
+        return referencedTables;
+    }
+
+    public String createJoiningTables(String className) {
+        ArrayList<String> connectedTables = getRelatingTables(className);
+
+        StringBuilder joiningTableQuery = new StringBuilder();
+        connectedTables.forEach((complete_name) -> {
+            String referenced_table = complete_name.substring(complete_name.lastIndexOf("_") + 1);
+            String referencing_table = complete_name.substring(0,complete_name.indexOf("_"));
+
+            joiningTableQuery.append(INNER_JOIN);
+            joiningTableQuery.append(complete_name);
+            joiningTableQuery.append(ON);
+            joiningTableQuery.append(complete_name);
+            joiningTableQuery.append(PERIOD);
+            joiningTableQuery.append(referencing_table);
+            joiningTableQuery.append(EQUALS);
+            joiningTableQuery.append(referencing_table);
+            joiningTableQuery.append(PERIOD);
+            joiningTableQuery.append(ID);
+            joiningTableQuery.append(NEW_LINE);
+            joiningTableQuery.append(INNER_JOIN);
+            joiningTableQuery.append(referenced_table);
+            joiningTableQuery.append(ON);
+            joiningTableQuery.append(referenced_table);
+            joiningTableQuery.append(PERIOD);
+            joiningTableQuery.append(ID);
+            joiningTableQuery.append(EQUALS);
+            joiningTableQuery.append(complete_name);
+            joiningTableQuery.append(PERIOD);
+            joiningTableQuery.append(referenced_table);
+        });
+        return joiningTableQuery.toString();
+    }
 
     public String[] getDifferingColumns(SQLWriteObject writeObject) {
         return new String[]{};
