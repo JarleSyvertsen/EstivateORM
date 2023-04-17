@@ -22,6 +22,8 @@ public class SQLTableCalculations {
     private String AND = "AND ";
     private String NAME = "name ";
     private String INNER_JOIN = "INNER JOIN ";
+    private String LEFT_JOIN = "LEFT JOIN ";
+    private String RIGHT_JOIN = "RIGHT JOIN ";
     private String ON = " ON ";
     private String EQUALS =  " = ";
     private String PERIOD = ".";
@@ -154,7 +156,7 @@ public class SQLTableCalculations {
             String referenced_table = complete_name.substring(complete_name.lastIndexOf("_") + 1);
             String referencing_table = complete_name.substring(0,complete_name.indexOf("_"));
 
-            joiningTableQuery.append(INNER_JOIN);
+            joiningTableQuery.append(LEFT_JOIN);
             joiningTableQuery.append(complete_name);
             joiningTableQuery.append(ON);
             joiningTableQuery.append(complete_name);
@@ -165,7 +167,7 @@ public class SQLTableCalculations {
             joiningTableQuery.append(PERIOD);
             joiningTableQuery.append(ID);
             joiningTableQuery.append(NEW_LINE);
-            joiningTableQuery.append(INNER_JOIN);
+            joiningTableQuery.append(LEFT_JOIN);
             joiningTableQuery.append(referenced_table);
             joiningTableQuery.append(ON);
             joiningTableQuery.append(referenced_table);
