@@ -8,6 +8,8 @@ import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
 
+import javax.xml.transform.Result;
+
 import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.getCompatAttr;
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
@@ -109,10 +111,6 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return reader.toString();
     }
 
-    private String addJoins(Class queryClass) {
-        return null;
-    }
-
     private String createWritableSQLString(SQLWriteObject writeObject) {
         if (!tableManagement.insertIsTableCorrect(writeObject)) {
             tableManagement.createTable(writeObject);
@@ -170,7 +168,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
                 HashMap<String, SQLAttribute> parsedAttributes = objectParser.parseObjectToAttributeList(v.getDataRaw());
 
                 SQLWriteObject recursiveObject = new SQLWriteObject(parsedAttributes);
-                String recursiveRelationship = createRelationshipInsert(parentClass, getObjectClass(recursiveObject));
+                String recursiveRelationship = createRelationshipInsert(k, parentClass, getObjectClass(recursiveObject));
                 String appendingTable = tableManagement.createAppendingTableIfMissing(parentClass, recursiveObject);
 
                 recursiveAdds.append("\n");
@@ -184,12 +182,14 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return recursiveAdds;
     }
 
-    private String createRelationshipInsert(String parentId, String childId) {
+    private String createRelationshipInsert(String setter, String parentId, String childId) {
         StringBuilder relationshipInsert = new StringBuilder();
         StringBuilder keys = new StringBuilder();
         keys.append(parentId);
         keys.append(",");
         keys.append(childId);
+        keys.append(",");
+        keys.append("setter");
         keys.append(" ");
 
         relationshipInsert.append("\n");
@@ -202,7 +202,10 @@ public class SQLParserTextConcatenation implements ISQLParser {
         relationshipInsert.append(SELECT);
         relationshipInsert.append("parent");
         relationshipInsert.append(",");
-        relationshipInsert.append("child ");
+        relationshipInsert.append("child");
+        relationshipInsert.append(",");
+        relationshipInsert.append(String.format("\"%s\"", setter));
+        relationshipInsert.append(" ");
         relationshipInsert.append(FROM);
         relationshipInsert.append("tempRelations");
 
@@ -228,7 +231,6 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     private static HashMap<String, SQLAttribute> getAttributeMap(HashMap<String, String> describedTable, ResultSet querySet) {
         HashMap<String, SQLAttribute> readAttributes = new HashMap<>();
-
         try {
             for (Map.Entry<String, String> entry : describedTable.entrySet()) {
                 String attributeName = entry.getKey();
@@ -245,6 +247,14 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return readAttributes;
     }
 
+    private static String getStringFromQuerySet(String get, ResultSet rs) {
+        try {
+            return rs.getString(get);
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
     private HashMap<String, SQLAttribute> getAttributeMap(Class topLevelCast, ArrayList<String> RelatedTables, HashMap<String, String> describedTable, ResultSet querySet) {
         HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
         for(String relatedTable : RelatedTables) {
@@ -253,7 +263,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
                 String topLevelCastingElement = topLevelCast.getName();
                 String fullPath = topLevelCastingElement.substring(0, topLevelCastingElement.lastIndexOf(".") + 1);
                 Class<?> castingClass = Class.forName(fullPath + relatedTable);
-                readAttributes.put(relatedTable.toLowerCase(), new SQLAttribute(castingClass,objectParser.parseAttributeListToObject(castingClass, subElementMap)));
+                readAttributes.put(getStringFromQuerySet("setter", querySet),  new SQLAttribute(castingClass,objectParser.parseAttributeListToObject(castingClass, subElementMap)));
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
