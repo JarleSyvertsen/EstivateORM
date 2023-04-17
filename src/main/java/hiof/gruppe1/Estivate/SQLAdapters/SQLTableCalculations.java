@@ -71,6 +71,7 @@ public class SQLTableCalculations {
         HashMap<String, String> idMap = new HashMap<>();
         idMap.put(parentId, "INTEGER");
         idMap.put(childId, "INTEGER");
+        attributes.append(String.format("\"%s\" %s,", "setter", "TEXT"));
         idMap.forEach((k,v) -> {
             attributes.append(String.format("\"%s\" %s,", k, v));
         });
