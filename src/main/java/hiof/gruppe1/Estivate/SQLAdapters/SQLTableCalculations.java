@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.convertToSQLDialect;
 import static hiof.gruppe1.Estivate.SQLParsers.SQLParserTextConcatenation.getObjectClass;
@@ -56,7 +58,9 @@ public class SQLTableCalculations {
     public Boolean insertIsTableCorrect(SQLWriteObject writeObject) {
         HashMap<String,String> SQLDescription = driver.describeTable(writeObject.getAttributeList().get("class").getInnerClass());
         HashMap<String, String> writeObjectDescription = getWriteDescription(writeObject);
-        return SQLDescription.equals(writeObjectDescription);
+        Set<String> difference = new HashSet<>(writeObjectDescription.keySet());
+        difference.removeAll(SQLDescription.keySet());
+        return difference.isEmpty();
     }
 
     public void createTable(SQLWriteObject ObjectToTable) {

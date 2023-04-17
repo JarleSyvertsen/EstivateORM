@@ -15,9 +15,12 @@ public class Main {
                 .setDebug(false)
                 .build();
         Author perArne = new Author("Per Arne", "To tredjedel ved fra ORM");
+        Author perPer = new Author();
+        perPer.setName("Per Per");
         Page testPage = new Page(23, "Hello");
         perArne.setFavoritePage(testPage);
         persist.persist(perArne);
+        persist.persist(perPer);
        ArrayList<Author> authors = persist.getAll(Author.class);
        System.out.println(authors);
     }
