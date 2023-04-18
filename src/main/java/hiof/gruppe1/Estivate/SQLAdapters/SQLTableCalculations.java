@@ -31,6 +31,9 @@ public class SQLTableCalculations {
     private String PERIOD = ".";
     private String ID = "id";
     private String NEW_LINE = "\n";
+    private String ALTER_TABLE = "ALTER TABLE ";
+    private String ADD = "ADD ";
+
     public SQLTableCalculations(IDriverHandler driver) {
         this.driver = driver;
     }
@@ -55,12 +58,18 @@ public class SQLTableCalculations {
        return driver.describeTable(relationName).isEmpty();
     }
 
-    public Boolean insertIsTableCorrect(SQLWriteObject writeObject) {
+    public void createOrResizeTableIfNeeded(SQLWriteObject writeObject) {
         HashMap<String,String> SQLDescription = driver.describeTable(writeObject.getAttributeList().get("class").getInnerClass());
         HashMap<String, String> writeObjectDescription = getWriteDescription(writeObject);
-        Set<String> difference = new HashSet<>(writeObjectDescription.keySet());
-        difference.removeAll(SQLDescription.keySet());
-        return difference.isEmpty();
+        HashMap<String, String> difference = new HashMap<>(writeObjectDescription);
+        difference.keySet().removeAll(SQLDescription.keySet());
+        if(SQLDescription.isEmpty()) {
+            createTable(writeObject);
+            return;
+        }
+        if(!difference.isEmpty()) {
+            appendMissingColumns(writeObject, difference);
+        }
     }
 
     public void createTable(SQLWriteObject ObjectToTable) {
@@ -184,12 +193,20 @@ public class SQLTableCalculations {
         });
         return joiningTableQuery.toString();
     }
-
-    public String[] getDifferingColumns(SQLWriteObject writeObject) {
-        return new String[]{};
-    }
-    public Boolean appendMissingColumns(SQLWriteObject writeObject) {
-        return false;
+    public void appendMissingColumns(SQLWriteObject writeObject, HashMap<String, String> difference) {
+        String tableName = writeObject.getAttributeList().get("class").getInnerClass();
+        StringBuilder alterOperation = new StringBuilder();
+        alterOperation.append(ALTER_TABLE);
+        alterOperation.append(tableName);
+        difference.forEach((name,type) -> {
+            alterOperation.append("\n");
+            alterOperation.append(ADD);
+            alterOperation.append(name);
+            alterOperation.append(" ");
+            alterOperation.append(type);
+            alterOperation.append(";");
+        });
+        driver.executeNoReturnSplit(alterOperation.toString());
     }
 
 }

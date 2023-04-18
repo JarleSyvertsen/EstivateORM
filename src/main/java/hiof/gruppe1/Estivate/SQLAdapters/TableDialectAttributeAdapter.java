@@ -19,6 +19,9 @@ public class TableDialectAttributeAdapter {
         HashMap<Class, String> SQLiteKeys = new HashMap<>();
         SQLiteKeys.put(String.class, "TEXT");
         SQLiteKeys.put(Integer.class, "INTEGER");
+        SQLiteKeys.put(Double.class, "DOUBLE");
+        SQLiteKeys.put(Float.class, "FLOAT");
+        SQLiteKeys.put(Boolean.class, "BOOLEAN");
         return SQLiteKeys;
     }
 
@@ -26,6 +29,10 @@ public class TableDialectAttributeAdapter {
         HashMap<String, SQLJavaAttr> SQLAttrAsKey = new HashMap<>();
         SQLAttrAsKey.put("TEXT", SQLJavaAttr.STRING_COMPAT);
         SQLAttrAsKey.put("INTEGER", SQLJavaAttr.INT_COMPAT);
+        SQLAttrAsKey.put("DOUBLE", SQLJavaAttr.DOUBLE_COMPAT);
+        SQLAttrAsKey.put("FLOAT", SQLJavaAttr.FLOAT_COMPAT);
+        SQLAttrAsKey.put("BOOLEAN", SQLJavaAttr.BOOLEAN_COMPAT);
+
         return SQLAttrAsKey;
     }
     public static SQLJavaAttr getCompatAttr(String sqlAttr) {
