@@ -8,8 +8,6 @@ import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
 
-import javax.xml.transform.Result;
-
 import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.getCompatAttr;
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
@@ -112,9 +110,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     private String createWritableSQLString(SQLWriteObject writeObject) {
-        if (!tableManagement.insertIsTableCorrect(writeObject)) {
-            tableManagement.createTable(writeObject);
-        }
+        tableManagement.createOrResizeTableIfNeeded(writeObject);
 
         if (writeObject.getAttributeList().get("id").getData().toString().equals("0")) {
             writeObject.getAttributeList().remove("id");

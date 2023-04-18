@@ -19,8 +19,8 @@ public class Main {
         perPer.setName("Per Per");
         Page testPage = new Page(23, "Hello");
         perArne.setFavoritePage(testPage);
-        persist.persist(perArne);
         persist.persist(perPer);
+        persist.persist(perArne);
        ArrayList<Author> authors = persist.getAll(Author.class);
        System.out.println(authors);
     }
