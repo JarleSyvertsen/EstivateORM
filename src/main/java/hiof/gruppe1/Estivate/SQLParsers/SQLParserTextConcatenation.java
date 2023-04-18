@@ -234,6 +234,9 @@ public class SQLParserTextConcatenation implements ISQLParser {
                 switch (getCompatAttr(attributeValue)) {
                     case INT_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
                     case STRING_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
+                    case BOOLEAN_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Boolean.class, querySet.getBoolean(attributeName)));
+                    case DOUBLE_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Double.class, querySet.getDouble(attributeName)));
+                    case FLOAT_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Float.class, querySet.getFloat(attributeName)));
                 }
             }
         } catch (Exception e) {
