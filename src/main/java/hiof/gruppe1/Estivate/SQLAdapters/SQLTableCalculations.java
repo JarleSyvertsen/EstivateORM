@@ -208,8 +208,6 @@ public class SQLTableCalculations {
         difference.forEach((name,type) -> {
             alterOperation.append("\n");
             alterOperation.append(ADD);
-            alterOperation.append(tableName);
-            alterOperation.append(".");
             alterOperation.append(name);
             alterOperation.append(" ");
             alterOperation.append(type);
