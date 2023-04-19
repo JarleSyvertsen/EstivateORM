@@ -16,16 +16,15 @@ import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
 public class SQLTableCalculations {
     IDriverHandler driver;
-    private String CREATE_TABLE = "CREATE TABLE ";
+    private String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
     private String SELECT_FROM_SCHEMA = "SELECT name FROM sqlite_schema ";
     private String WHERE = "WHERE ";
     private String LIKE = "LIKE ";
     private String NOT_LIKE = "NOT LIKE ";
     private String AND = "AND ";
     private String NAME = "name ";
-    private String INNER_JOIN = "INNER JOIN ";
     private String LEFT_JOIN = "LEFT JOIN ";
-    private String RIGHT_JOIN = "RIGHT JOIN ";
+    private String UNDERSCORE = "_";
     private String ON = " ON ";
     private String EQUALS =  " = ";
     private String PERIOD = ".";
@@ -40,9 +39,10 @@ public class SQLTableCalculations {
 
     private HashMap<String, String> getWriteDescription(SQLWriteObject writeObject) {
         HashMap<String, String> writeObjectDescription = new HashMap<>();
+        String tableName = writeObject.getAttributeList().get("class").getInnerClass();
         writeObject.getAttributeList().forEach((k, v) -> {
             if(isSimple(v.getData().getClass())) {
-                writeObjectDescription.put(k, convertToSQLDialect(v.getData().getClass(), driver.getDialect()));
+                writeObjectDescription.put(tableName + "_" + k, convertToSQLDialect(v.getData().getClass(), driver.getDialect()));
             }
         });
         return writeObjectDescription;
@@ -92,7 +92,7 @@ public class SQLTableCalculations {
         });
 
         idMap.forEach((k,v) -> {
-            foreignKeys.append(String.format(" FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE CASCADE", k, k.toLowerCase(), "id"));
+            foreignKeys.append(String.format(" FOREIGN KEY (\"%s\") REFERENCES %s (\"%s_%s\") ON DELETE CASCADE", k, k, k, "id"));
         });
 
         joiningString.append(CREATE_TABLE);
@@ -115,7 +115,7 @@ public class SQLTableCalculations {
         StringBuilder query = new StringBuilder();
 
         String TABLE_NAME = String.format("\"%s\" ", tableName);
-        String PRIMARY_KEY = "PRIMARY KEY(\"id\" AUTOINCREMENT)";
+        String PRIMARY_KEY = String.format("PRIMARY KEY(\"%s_%s\" AUTOINCREMENT)", tableName, "id");
 
         tableAttributes.forEach((k,v) -> {
             attributes.append(String.format("\"%s\" %s,", k.toString(), v.toString()));
@@ -168,7 +168,7 @@ public class SQLTableCalculations {
         connectedTables.forEach((complete_name) -> {
             String referenced_table = complete_name.substring(complete_name.lastIndexOf("_") + 1);
             String referencing_table = complete_name.substring(0,complete_name.indexOf("_"));
-
+            // Joining Table
             joiningTableQuery.append(LEFT_JOIN);
             joiningTableQuery.append(complete_name);
             joiningTableQuery.append(ON);
@@ -178,13 +178,20 @@ public class SQLTableCalculations {
             joiningTableQuery.append(EQUALS);
             joiningTableQuery.append(referencing_table);
             joiningTableQuery.append(PERIOD);
+            joiningTableQuery.append(referencing_table);
+            joiningTableQuery.append(UNDERSCORE);
             joiningTableQuery.append(ID);
+
+
+            // Right-Table
             joiningTableQuery.append(NEW_LINE);
             joiningTableQuery.append(LEFT_JOIN);
             joiningTableQuery.append(referenced_table);
             joiningTableQuery.append(ON);
             joiningTableQuery.append(referenced_table);
             joiningTableQuery.append(PERIOD);
+            joiningTableQuery.append(referenced_table);
+            joiningTableQuery.append(UNDERSCORE);
             joiningTableQuery.append(ID);
             joiningTableQuery.append(EQUALS);
             joiningTableQuery.append(complete_name);

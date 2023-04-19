@@ -111,7 +111,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     private String createWritableSQLString(SQLWriteObject writeObject) {
         tableManagement.createOrResizeTableIfNeeded(writeObject);
-
+        String tableName = writeObject.getAttributeList().get("class").getInnerClass();
         if (writeObject.getAttributeList().get("id").getData().toString().equals("0")) {
             writeObject.getAttributeList().remove("id");
         }
@@ -138,7 +138,11 @@ public class SQLParserTextConcatenation implements ISQLParser {
         finalString.append(insertTable);
 
         writeObject.getAttributeList().forEach((k, v) -> {
+            keyString.append("\"");
+            keyString.append(tableName);
+            keyString.append("_");
             keyString.append(k);
+            keyString.append("\"");
             keyString.append(",");
             valuesString.append(createWritableValue(v));
             valuesString.append(",");
@@ -180,13 +184,11 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     private String createRelationshipInsert(String setter, String parentId, String childId) {
         StringBuilder relationshipInsert = new StringBuilder();
-        StringBuilder keys = new StringBuilder();
-        keys.append(parentId);
-        keys.append(",");
-        keys.append(childId);
-        keys.append(",");
-        keys.append("setter");
-        keys.append(" ");
+        ArrayList<String> keyValues = new ArrayList<>();
+        keyValues.add(parentId);
+        keyValues.add(childId);
+        keyValues.add("setter");
+        StringBuilder keys = createCommaValues(keyValues);
 
         relationshipInsert.append("\n");
         relationshipInsert.append(INSERT_INTO);
@@ -204,11 +206,17 @@ public class SQLParserTextConcatenation implements ISQLParser {
         relationshipInsert.append(" ");
         relationshipInsert.append(FROM);
         relationshipInsert.append("tempRelations");
+        relationshipInsert.append(";");
 
         return relationshipInsert.toString();
     }
 
-
+    private StringBuilder createCommaValues(ArrayList<String> values) {
+        StringBuilder sb = new StringBuilder();
+        values.forEach((v) -> sb.append(String.format("\"%s\", ", v)));
+        sb.deleteCharAt(sb.length() - 1);
+        return sb;
+    }
     private String createValuesInParenthesis(StringBuilder keyString) {
         StringBuilder finalString = new StringBuilder();
         finalString.append("(");
@@ -225,18 +233,19 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return sqlAttr.getData().toString();
     }
 
-    private static HashMap<String, SQLAttribute> getAttributeMap(HashMap<String, String> describedTable, ResultSet querySet) {
+    private static HashMap<String, SQLAttribute> getAttributeMap(HashMap<String, String> describedTable, ResultSet querySet, String tableName) {
         HashMap<String, SQLAttribute> readAttributes = new HashMap<>();
         try {
             for (Map.Entry<String, String> entry : describedTable.entrySet()) {
                 String attributeName = entry.getKey();
                 String attributeValue = entry.getValue();
+                String cleanAttributeName = attributeName.substring(attributeName.indexOf("_") + 1);
                 switch (getCompatAttr(attributeValue)) {
-                    case INT_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
-                    case STRING_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
-                    case BOOLEAN_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Boolean.class, querySet.getBoolean(attributeName)));
-                    case DOUBLE_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Double.class, querySet.getDouble(attributeName)));
-                    case FLOAT_COMPAT -> readAttributes.put(attributeName, new SQLAttribute(Float.class, querySet.getFloat(attributeName)));
+                    case INT_COMPAT -> readAttributes.put(cleanAttributeName, new SQLAttribute(Integer.class, querySet.getInt(attributeName)));
+                    case STRING_COMPAT -> readAttributes.put(cleanAttributeName, new SQLAttribute(String.class, querySet.getString(attributeName)));
+                    case BOOLEAN_COMPAT -> readAttributes.put(cleanAttributeName, new SQLAttribute(Boolean.class, querySet.getBoolean(attributeName)));
+                    case DOUBLE_COMPAT -> readAttributes.put(cleanAttributeName, new SQLAttribute(Double.class, querySet.getDouble(attributeName)));
+                    case FLOAT_COMPAT -> readAttributes.put(cleanAttributeName, new SQLAttribute(Float.class, querySet.getFloat(attributeName)));
                 }
             }
         } catch (Exception e) {
@@ -255,9 +264,9 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     private HashMap<String, SQLAttribute> getAttributeMap(Class topLevelCast, ArrayList<String> RelatedTables, HashMap<String, String> describedTable, ResultSet querySet) {
-        HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
+        HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet, topLevelCast.getSimpleName());
         for(String relatedTable : RelatedTables) {
-            HashMap<String, SQLAttribute> subElementMap = getAttributeMap(sqlDriver.describeTable(relatedTable), querySet);
+            HashMap<String, SQLAttribute> subElementMap = getAttributeMap(sqlDriver.describeTable(relatedTable), querySet, relatedTable);
             try {
                 String topLevelCastingElement = topLevelCast.getName();
                 String fullPath = topLevelCastingElement.substring(0, topLevelCastingElement.lastIndexOf(".") + 1);

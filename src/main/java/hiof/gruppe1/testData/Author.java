@@ -4,8 +4,18 @@ public class Author {
     private int id;
     private String name;
     private String books;
-
+    private String secret;
     private Page favoritePage;
+
+    private Page leastFavoritePage;
+
+    public Page getLeastFavoritePage() {
+        return leastFavoritePage;
+    }
+
+    public void setLeastFavoritePage(Page leastFavoritePage) {
+        this.leastFavoritePage = leastFavoritePage;
+    }
 
     public Page getFavoritePage() {
         return favoritePage;
@@ -45,5 +55,13 @@ public class Author {
 
     public void setBooks(String books) {
         this.books = books;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 }
