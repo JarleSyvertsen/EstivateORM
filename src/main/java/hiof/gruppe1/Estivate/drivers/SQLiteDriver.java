@@ -33,8 +33,8 @@ public class SQLiteDriver implements IDriverHandler {
             // This is to no massively complicate the code with calculating the most optimal
             // action, and instead recreating objects when needed.
 
-            Statement respectConstraints = connection.createStatement();
-            respectConstraints.executeUpdate("PRAGMA foreign_keys = ON;");
+            Statement pragmaSettings = connection.createStatement();
+            pragmaSettings.executeUpdate("PRAGMA foreign_keys = ON;");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
