@@ -14,13 +14,20 @@ public class Main {
                 setDBUrl("src/main/java/resources/estivateSQLite.db")
                 .setDebug(false)
                 .build();
-        Author perArne = new Author("Per Arne", "To tredjedel ved fra ORM");
-        Author perPer = new Author();
-        perPer.setName("Per Per");
+        Author perArne = new Author("Per Arne", "To tredjedel");
         Page testPage = new Page(23, "Hello");
+        Page testPage2 = new Page(24, "Hi");
         perArne.setFavoritePage(testPage);
+        perArne.setLeastFavoritePage(testPage2);
+
+        Author perPer = new Author();
+        Author perSecret = new Author("Per Secret", "sss");
+        perPer.setName("Per Per");
+
+        perSecret.setSecret("EEE");
         persist.persist(perPer);
         persist.persist(perArne);
+        persist.persist(perSecret);
        ArrayList<Author> authors = persist.getAll(Author.class);
        System.out.println(authors);
     }

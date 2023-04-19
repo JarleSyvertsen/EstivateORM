@@ -204,6 +204,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
         relationshipInsert.append(" ");
         relationshipInsert.append(FROM);
         relationshipInsert.append("tempRelations");
+        relationshipInsert.append(";");
 
         return relationshipInsert.toString();
     }

@@ -56,7 +56,7 @@ public class SQLiteDriver implements IDriverHandler {
                 executeStatement.execute();
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 

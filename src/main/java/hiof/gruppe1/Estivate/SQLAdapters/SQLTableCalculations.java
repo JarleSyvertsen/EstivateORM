@@ -16,7 +16,7 @@ import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
 public class SQLTableCalculations {
     IDriverHandler driver;
-    private String CREATE_TABLE = "CREATE TABLE ";
+    private String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
     private String SELECT_FROM_SCHEMA = "SELECT name FROM sqlite_schema ";
     private String WHERE = "WHERE ";
     private String LIKE = "LIKE ";
