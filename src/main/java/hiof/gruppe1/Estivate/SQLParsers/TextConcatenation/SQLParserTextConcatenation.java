@@ -47,7 +47,6 @@ public class SQLParserTextConcatenation implements ISQLParser {
     public <T> T readFromDatabase(Class<T> castTo, int id) {
         String SQLQuery = readBuilder.createReadableSQLString(castTo, id);
         HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
-   //     ArrayList<String> relatedTables = tableManagement.getRelatedTables(castTo.getSimpleName());
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
 
         HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
@@ -63,8 +62,16 @@ public class SQLParserTextConcatenation implements ISQLParser {
         ArrayList<T> arrayOfObjects = new ArrayList<>();
         try {
             while (querySet.next()) {
-                T object = objectParser.parseAttributeListToObject(castTo, getAttributeMap(describedTable, querySet));
-                objectParser.getSubElementList(object);
+                HashMap<String, SQLAttribute> attributeHashMap = getAttributeMap(describedTable, querySet);
+                int parentId = attributeHashMap.get("id").getData();
+                T object = objectParser.parseAttributeListToObject(castTo, attributeHashMap);
+                HashMap<String, Class<?>> subElementList = objectParser.getSubElementList(object);
+                subElementList.forEach((k,v) -> {
+                    int childId = getChildId(castTo, parentId, k, v);
+                    if(childId > 0) {
+                        objectParser.addElementToObject(object, readFromDatabase(v, childId), k);
+                    }
+                });
                 arrayOfObjects.add(object);
             }
         } catch (SQLException e) {
@@ -91,25 +98,18 @@ public class SQLParserTextConcatenation implements ISQLParser {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
         return readAttributes;
     }
 
-    private HashMap<String, SQLAttribute> getAttributeMap(Class topLevelCast, ArrayList<String> RelatedTables, HashMap<String, String> describedTable, ResultSet querySet) {
-        HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
-        for(String relatedTable : RelatedTables) {
-            HashMap<String, SQLAttribute> subElementMap = getAttributeMap(sqlDriver.describeTable(relatedTable), querySet);
-            try {
-                String topLevelCastingElement = topLevelCast.getName();
-                String fullPath = topLevelCastingElement.substring(0, topLevelCastingElement.lastIndexOf(".") + 1);
-                Class<?> castingClass = Class.forName(fullPath + relatedTable);
-                readAttributes.put(StringUtils.getStringFromQuerySet("setter", querySet),  new SQLAttribute(castingClass,objectParser.parseAttributeListToObject(castingClass, subElementMap)));
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
+
+    private <T> int getChildId(Class<T> parentClass, int parentId, String setter, Class<?> childClass) {
+        try (ResultSet resultSet = sqlDriver.executeQuery(readBuilder.getIdOfSubElement(setter, childClass.getSimpleName(), parentClass.getSimpleName(), parentId))) {
+            if(resultSet != null) {
+                return resultSet.getInt(1);
             }
-
+        } catch (SQLException e) {
+            return -1;
         }
-        return readAttributes;
+        return -1;
     }
-
 }

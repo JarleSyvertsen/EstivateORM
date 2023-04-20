@@ -2,12 +2,8 @@ package hiof.gruppe1.Estivate.objectParsers;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 import static java.util.Arrays.stream;
@@ -49,22 +45,24 @@ public class ReflectionParser implements IObjectParser {
         return creationObject;
     }
 
-    public <T> ArrayList<String> getSubElementList(T castingClass) {
-        ArrayList<String> subElementList = new ArrayList<>();
+    public <T> HashMap<String, Class<?>> getSubElementList(T castingClass) {
+        HashMap<String, Class<?>> subElementList = new HashMap<>();
         for (Method setter : castingClass.getClass().getMethods())
         {
             if (!setter.getName().startsWith("set")) { continue; }
             String setName = setter.getName().substring(3).toLowerCase();
                 if (!isSimple(setter.getParameterTypes()[0])) {
-                    subElementList.add(setName);
+                    subElementList.put(setName, setter.getParameterTypes()[0]);
                 }
         }
         return subElementList;
     }
 
-    public static <S, T> T addElementToObject(T baseElement, S elementToAppend, String setter) {
+    public  <S, T> T addElementToObject(T baseElement, S elementToAppend, String setter) {
         for (Method setMethod : baseElement.getClass().getMethods()) {
-            if(setMethod.getName().equals(setter)) {
+            if (!setMethod.getName().startsWith("set")) { continue; }
+            String setterName = setMethod.getName().substring(3).toLowerCase();
+            if(setterName.equals(setter)) {
                 try {
                     setMethod.invoke(baseElement, elementToAppend);
                 } catch (IllegalAccessException | InvocationTargetException e) {
