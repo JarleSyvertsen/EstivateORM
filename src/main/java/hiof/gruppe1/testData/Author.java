@@ -8,6 +8,15 @@ public class Author {
     private Page favoritePage;
 
     private Page leastFavoritePage;
+    private Food favoriteFood;
+
+    public Food getFavoriteFood() {
+        return favoriteFood;
+    }
+
+    public void setFavoriteFood(Food favoriteFood) {
+        this.favoriteFood = favoriteFood;
+    }
 
     public Page getLeastFavoritePage() {
         return leastFavoritePage;
