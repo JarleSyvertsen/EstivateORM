@@ -103,7 +103,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
 
     private <T> int getChildId(Class<T> parentClass, int parentId, String setter, Class<?> childClass) {
-        try (ResultSet resultSet = sqlDriver.executeQuery(readBuilder.getIdOfSubElement(setter, childClass.getSimpleName(), parentClass.getSimpleName(), parentId))) {
+        try (ResultSet resultSet = sqlDriver.executeQueryIgnoreNoTable(readBuilder.getIdOfSubElement(setter, childClass.getSimpleName(), parentClass.getSimpleName(), parentId))) {
             if(resultSet != null) {
                 return resultSet.getInt(1);
             }

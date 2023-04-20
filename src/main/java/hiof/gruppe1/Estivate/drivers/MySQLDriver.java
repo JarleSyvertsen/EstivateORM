@@ -27,6 +27,11 @@ public class MySQLDriver implements IDriverHandler {
     }
 
     @Override
+    public ResultSet executeQueryIgnoreNoTable(String query) {
+        return null;
+    }
+
+    @Override
     public String getDialect() {
         return dialect;
     }

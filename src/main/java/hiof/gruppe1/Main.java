@@ -23,7 +23,6 @@ public class Main {
         Food pizza = new Food();
         pizza.setName("Pizza");
         pizza.setTaste("Great");
-        perArne.setFavoriteFood(pizza);
         Author perPer = new Author();
         Author perSecret = new Author("Per Secret", "sss");
         perPer.setName("Per Per");
