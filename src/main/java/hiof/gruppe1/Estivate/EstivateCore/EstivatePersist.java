@@ -4,7 +4,7 @@ import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLSearchQuery;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.SQLParsers.ISQLParser;
-import hiof.gruppe1.Estivate.SQLParsers.SQLParserTextConcatenation;
+import hiof.gruppe1.Estivate.SQLParsers.TextConcatenation.SQLParserTextConcatenation;
 import hiof.gruppe1.Estivate.config.config;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.drivers.SQLiteDriver;

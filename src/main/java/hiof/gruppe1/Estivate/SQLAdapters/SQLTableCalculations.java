@@ -7,11 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.convertToSQLDialect;
-import static hiof.gruppe1.Estivate.SQLParsers.SQLParserTextConcatenation.getObjectClass;
+import static hiof.gruppe1.Estivate.SQLParsers.TextConcatenation.SQLParserTextConcatenation.getObjectClass;
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
 public class SQLTableCalculations {
