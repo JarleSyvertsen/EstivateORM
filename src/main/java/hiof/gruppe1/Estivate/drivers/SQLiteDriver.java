@@ -60,8 +60,8 @@ public class SQLiteDriver implements IDriverHandler {
         }
     }
 
-    public ResultSet executeQuery(String query) {
-        ResultSet rs = null;
+    private ResultSet executeQueryBase(String query) throws SQLException {
+        ResultSet rs;
         String executingQuery = query;
         // Creating an empty rs is non-trivial, we instead rely on an empty search
         // Though in practice, this should be handled without hitting the database.
@@ -69,16 +69,29 @@ public class SQLiteDriver implements IDriverHandler {
             System.out.println("query: \n" + query);
             executingQuery = "SELECT 1 WHERE false";
         }
-
-        try {
-            Connection connection = connect();
-            PreparedStatement selectStatement = connection.prepareStatement(executingQuery);
-            rs = selectStatement.executeQuery();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
+        Connection connection = connect();
+        PreparedStatement selectStatement = connection.prepareStatement(executingQuery);
+        rs = selectStatement.executeQuery();
         return rs;
     }
+
+    public ResultSet executeQuery(String query) {
+        try {
+            return executeQueryBase(query);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+    public ResultSet executeQueryIgnoreNoTable(String query) {
+        try {
+           return executeQueryBase(query);
+        } catch (SQLException e) {
+        }
+        return null;
+    }
+
+
     @Override
     public HashMap<String, String> describeTable(Class classOfTable) {
        return describeTable(classOfTable.getSimpleName());
