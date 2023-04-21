@@ -18,10 +18,15 @@ public class SQLAttribute {
     public <T> T getDataCast(Class<T> typeToCast) {
         return (T) typeToCast.cast(object);
     }
-    public String getInnerClass() {
+    public String getInnerName() {
         // getClass will simply defer to the general object class, so we need to use toString and format it ourselves.
         String parsePath = object.toString();
         String[] parts = parsePath.split("\\.");
         return parts[parts.length-1];
+    }
+
+    public String getFullName() {
+        String fullName = object.toString();
+        return fullName.substring(fullName.lastIndexOf(" ") + 1);
     }
 }

@@ -48,14 +48,16 @@ public class SQLiteDriver implements IDriverHandler {
         }
 
         String[] splitQuery = query.split(";");
-
+        int i = -1;
         try {
             Connection connection = connect();
             for(String semicolonSeparatedQuery : splitQuery) {
+                i++;
                 PreparedStatement executeStatement = connection.prepareStatement(semicolonSeparatedQuery);
                 executeStatement.execute();
             }
         } catch (SQLException e) {
+            System.out.println(i);
             e.printStackTrace();
         }
     }
