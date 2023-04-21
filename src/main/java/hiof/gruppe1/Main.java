@@ -2,10 +2,7 @@ package hiof.gruppe1;
 
 import hiof.gruppe1.Estivate.EstivateCore.EstivatePersist;
 import hiof.gruppe1.Estivate.objectBuilders.EstivateBuilder;
-import hiof.gruppe1.testData.Author;
-import hiof.gruppe1.testData.AuthorList;
-import hiof.gruppe1.testData.Food;
-import hiof.gruppe1.testData.Page;
+import hiof.gruppe1.testData.*;
 
 import java.util.ArrayList;
 
@@ -28,13 +25,16 @@ public class Main {
         Author perSecret = new Author("Per Secret", "sss");
         perPer.setName("Per Per");
         AuthorList authorList = new AuthorList();
+
         authorList.setTopAuthor(perArne);
         authorList.setName("TopList");
-        persist.persist(authorList);
-        Author perArneRetrieved = persist.getOne(1, Author.class);
-        ArrayList<AuthorList> al = persist.getAll(AuthorList.class);
-        System.out.println(al);
-        System.out.println(perArneRetrieved);
+
+        AuthorListList ALL = new AuthorListList();
+        ALL.setAaah("EEEH");
+        ALL.setAuthorList(authorList);
+        persist.persist(ALL);
+        AuthorListList retrieved = persist.getOne(1, AuthorListList.class);
+        System.out.println(retrieved);
 
     }
 }
