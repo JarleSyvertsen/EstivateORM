@@ -1,4 +1,4 @@
-package hiof.gruppe1.Estivate.SQLAdapters;
+package hiof.gruppe1.Estivate.SQLParsers.TextConcatenation;
 
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
@@ -12,7 +12,7 @@ import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.con
 import static hiof.gruppe1.Estivate.SQLParsers.TextConcatenation.SQLParserTextConcatenation.getObjectClass;
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
-public class SQLTableCalculations {
+public class TextConcatTableManagement {
     IDriverHandler driver;
     private String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
     private String SELECT_FROM_SCHEMA = "SELECT name FROM sqlite_schema ";
@@ -31,13 +31,13 @@ public class SQLTableCalculations {
     private String ALTER_TABLE = "ALTER TABLE ";
     private String ADD = "ADD ";
 
-    public SQLTableCalculations(IDriverHandler driver) {
+    public TextConcatTableManagement(IDriverHandler driver) {
         this.driver = driver;
     }
 
     private HashMap<String, String> getWriteDescription(SQLWriteObject writeObject) {
         HashMap<String, String> writeObjectDescription = new HashMap<>();
-        String tableName = writeObject.getAttributeList().get("class").getInnerClass();
+        String tableName = writeObject.getAttributeList().get("class").getInnerName();
         writeObject.getAttributeList().forEach((k, v) -> {
             if(isSimple(v.getData().getClass())) {
                 writeObjectDescription.put(tableName + "_" + k, convertToSQLDialect(v.getData().getClass(), driver.getDialect()));
@@ -57,7 +57,7 @@ public class SQLTableCalculations {
     }
 
     public void createOrResizeTableIfNeeded(SQLWriteObject writeObject) {
-        HashMap<String,String> SQLDescription = driver.describeTable(writeObject.getAttributeList().get("class").getInnerClass());
+        HashMap<String,String> SQLDescription = driver.describeTable(writeObject.getAttributeList().get("class").getInnerName());
         HashMap<String, String> writeObjectDescription = getWriteDescription(writeObject);
         HashMap<String, String> difference = new HashMap<>(writeObjectDescription);
         difference.keySet().removeAll(SQLDescription.keySet());
@@ -71,7 +71,7 @@ public class SQLTableCalculations {
     }
 
     public void createTable(SQLWriteObject ObjectToTable) {
-        String tableName = ObjectToTable.getAttributeList().get("class").getInnerClass();
+        String tableName = ObjectToTable.getAttributeList().get("class").getInnerName();
         String createQuery = createTableQuery(getWriteDescription(ObjectToTable), tableName);
         driver.executeNoReturnSplit(createQuery);
     }
@@ -199,7 +199,7 @@ public class SQLTableCalculations {
         return joiningTableQuery.toString();
     }
     public void appendMissingColumns(SQLWriteObject writeObject, HashMap<String, String> difference) {
-        String tableName = writeObject.getAttributeList().get("class").getInnerClass();
+        String tableName = writeObject.getAttributeList().get("class").getInnerName();
         StringBuilder alterOperation = new StringBuilder();
         alterOperation.append(ALTER_TABLE);
         alterOperation.append(tableName);

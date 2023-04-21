@@ -45,6 +45,15 @@ public class ReflectionParser implements IObjectParser {
         return creationObject;
     }
 
+    public Boolean hasSubElements(String castingClass) {
+        try {
+            HashMap<String, Class<?>> subElements = getSubElementList(createClassOfType(Class.forName(castingClass)));
+            return !subElements.isEmpty();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public <T> HashMap<String, Class<?>> getSubElementList(T castingClass) {
         HashMap<String, Class<?>> subElementList = new HashMap<>();
         for (Method setter : castingClass.getClass().getMethods())
@@ -58,7 +67,7 @@ public class ReflectionParser implements IObjectParser {
         return subElementList;
     }
 
-    public  <S, T> T addElementToObject(T baseElement, S elementToAppend, String setter) {
+    public  <S, T> void addElementToObject(T baseElement, S elementToAppend, String setter) {
         for (Method setMethod : baseElement.getClass().getMethods()) {
             if (!setMethod.getName().startsWith("set")) { continue; }
             String setterName = setMethod.getName().substring(3).toLowerCase();
@@ -70,7 +79,6 @@ public class ReflectionParser implements IObjectParser {
                 }
             }
         }
-        return baseElement;
     }
 
     private static <T> T createClassOfType(Class<T> castTo) throws RuntimeException {

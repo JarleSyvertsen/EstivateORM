@@ -31,7 +31,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
     }
 
     public static String getObjectClass(SQLWriteObject writeObject) {
-        return writeObject.getAttributeList().get("class").getInnerClass();
+        return writeObject.getAttributeList().get("class").getInnerName();
     }
 
     public Boolean writeToDatabase(SQLMultiCommand multiCommand) {
@@ -50,7 +50,20 @@ public class SQLParserTextConcatenation implements ISQLParser {
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
 
         HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
-        return objectParser.parseAttributeListToObject(castTo, readAttributes);
+        HashMap<String, SQLAttribute> attributeHashMap = getAttributeMap(describedTable, querySet);
+
+        int parentId = attributeHashMap.get("id").getData();
+
+        T object = objectParser.parseAttributeListToObject(castTo, readAttributes);
+        HashMap<String, Class<?>> subElementList = objectParser.getSubElementList(object);
+        subElementList.forEach((k,v) -> {
+            int childId = getChildId(castTo, parentId, k, v);
+            if (childId > 0) {
+                objectParser.addElementToObject(object, readFromDatabase(v, childId), k);
+            }
+        });
+
+        return object;
     }
 
     public <T> ArrayList<T> readFromDatabase(Class<T> castTo) {
