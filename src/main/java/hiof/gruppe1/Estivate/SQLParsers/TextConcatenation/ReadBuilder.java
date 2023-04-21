@@ -52,7 +52,7 @@ public class ReadBuilder {
          selector.append(AND);
          selector.append("setter");
          selector.append(EQUALS);
-         selector.append(String.format("\"%s\"", setter));
+         selector.append(String.format("'%s'", setter));
          return selector.toString();
     }
 }
