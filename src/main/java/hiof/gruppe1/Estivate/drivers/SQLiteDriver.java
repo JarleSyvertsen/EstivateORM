@@ -61,6 +61,19 @@ public class SQLiteDriver implements IDriverHandler {
             e.printStackTrace();
         }
     }
+    public void executeNoReturn(String query) {
+        if(debug) {
+            System.out.println("query: \n" + query);
+            return;
+        }
+        try {
+            Connection connection = connect();
+            PreparedStatement executeStatement = connection.prepareStatement(query);
+            executeStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     private ResultSet executeQueryBase(String query) throws SQLException {
         ResultSet rs;

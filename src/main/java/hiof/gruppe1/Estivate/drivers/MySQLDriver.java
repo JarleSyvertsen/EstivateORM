@@ -17,6 +17,11 @@ public class MySQLDriver implements IDriverHandler {
     }
 
     @Override
+    public void executeNoReturn(String query) {
+
+    }
+
+    @Override
     public void executeNoReturnSplit(String query) {
 
     }
