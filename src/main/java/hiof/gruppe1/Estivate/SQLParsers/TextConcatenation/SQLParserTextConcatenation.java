@@ -56,17 +56,10 @@ public class SQLParserTextConcatenation implements ISQLParser {
         }
 
         String tableName = writeObject.getAttributeList().get("class").getInnerName();
-
         String insertTable = getObjectClass(writeObject);
         writeObject.getAttributeList().remove("class");
 
-        // PartBuilders to allow building the String in a non-linear way.
-        // Remove the complex objects after parsing.
-
-        SQLWriteObject writeObjectSimple = new SQLWriteObject();
-        writeObjectSimple.setAttributes((HashMap<String, SQLAttribute>) writeObject.getAttributeList().clone());
-        writeObjectSimple.getAttributeList().entrySet().removeIf(entry -> !isSimple(entry.getValue().getData().getClass()));
-
+        SQLWriteObject writeObjectSimple = createCopyNonPrimitives(writeObject);
         String finalString = writeBuilder.createInsertStatement(tableName, insertTable, writeObjectSimple);
 
         int parentId = executeGetId(tableName, finalString);
@@ -74,7 +67,6 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
         return String.valueOf(parentId);
     }
-
 
     private void traverseNonPrimitives(SQLWriteObject writeObject, String parentNameSimple, int parentId) {
         writeObject.getAttributeList().forEach((k, v) -> {
@@ -183,5 +175,11 @@ public class SQLParserTextConcatenation implements ISQLParser {
             throw new RuntimeException(e);
         }
         return id;
+    }
+
+    private SQLWriteObject createCopyNonPrimitives(SQLWriteObject completeObject) {
+        SQLWriteObject simple = new SQLWriteObject(new HashMap<>(completeObject.getAttributeList()));
+        simple.getAttributeList().entrySet().removeIf(entry -> !isSimple(entry.getValue().getData().getClass()));
+        return simple;
     }
 }
