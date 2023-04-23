@@ -51,16 +51,10 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
         HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
         HashMap<String, SQLAttribute> attributeHashMap = getAttributeMap(describedTable, querySet);
+
+        int parentId = attributeHashMap.get("id").getData();
+
         T object = objectParser.parseAttributeListToObject(castTo, readAttributes);
-        int parentId;
-
-        if(!attributeHashMap.isEmpty()) {
-            parentId = attributeHashMap.get("id").getData();
-            return object;
-        } else {
-            parentId = -1;
-        }
-
         HashMap<String, Class<?>> subElementList = objectParser.getSubElementList(object);
         subElementList.forEach((k,v) -> {
             int childId = getChildId(castTo, parentId, k, v);
@@ -71,6 +65,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
         return object;
     }
+
 
     public <T> ArrayList<T> readFromDatabase(Class<T> castTo) {
         String SQLQuery = readBuilder.createReadableSQLString(castTo);
