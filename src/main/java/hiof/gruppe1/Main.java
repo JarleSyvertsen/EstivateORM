@@ -24,6 +24,7 @@ public class Main {
         Author perPer = new Author();
         Author perSecret = new Author("Per Secret", "sss");
         perPer.setName("Per Per");
+        perArne.setFavoriteFood(pizza);
         AuthorList authorList = new AuthorList();
 
         authorList.setTopAuthor(perArne);
