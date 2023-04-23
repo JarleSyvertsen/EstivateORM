@@ -24,6 +24,7 @@ public class Main {
         Author perPer = new Author();
         Author perSecret = new Author("Per Secret", "sss");
         perPer.setName("Per Per");
+        perArne.setFavoriteFood(pizza);
         AuthorList authorList = new AuthorList();
 
         authorList.setTopAuthor(perArne);
@@ -33,8 +34,7 @@ public class Main {
         ALL.setAaah("EEEH");
         ALL.setAuthorList(authorList);
         persist.persist(ALL);
-        AuthorListList retrieved = persist.getOne(1, AuthorListList.class);
-        System.out.println(retrieved);
-
+        ArrayList<AuthorListList> authorListLists = persist.getAll(AuthorListList.class);
+        System.out.println(authorListLists);
     }
 }

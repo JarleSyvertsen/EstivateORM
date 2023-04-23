@@ -31,7 +31,6 @@ public class ReadBuilder {
         reader.append(SELECT_ALL_FROM);
         reader.append(queryClass.getSimpleName());
         reader.append(" ");
-        //  reader.append(tableManagement.createJoiningTables(queryClass.getSimpleName()));
         return reader.toString();
     }
 

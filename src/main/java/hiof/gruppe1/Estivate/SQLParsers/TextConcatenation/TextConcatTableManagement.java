@@ -45,10 +45,17 @@ public class TextConcatTableManagement {
         });
         return writeObjectDescription;
     }
-
-    public String createAppendingTableIfMissing(String parentClass, SQLWriteObject recursiveObject) {
-        return doesRelationExist(parentClass, getObjectClass(recursiveObject)) ?
-                createJoiningSyntax(parentClass, getObjectClass(recursiveObject)) : "";
+    public String createAppendingTableIfMissing(String parentClass, String recursiveClass) {
+        return doesRelationExist(parentClass, recursiveClass) ?
+                createJoiningSyntax(parentClass, recursiveClass) : "";
+    }
+    public void createAppendingTableIfMissing(String parentClass, String recursiveClass, Boolean execute) {
+        if(execute) {
+            String appendingTableString = createAppendingTableIfMissing(parentClass, recursiveClass);
+            if(!appendingTableString.isEmpty()) {
+                driver.executeNoReturn(appendingTableString);
+            }
+        }
     }
 
     public Boolean doesRelationExist(String parentId, String childId) {
