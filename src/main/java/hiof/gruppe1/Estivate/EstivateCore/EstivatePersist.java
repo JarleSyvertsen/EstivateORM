@@ -1,7 +1,6 @@
 package hiof.gruppe1.Estivate.EstivateCore;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
-import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
 import hiof.gruppe1.Estivate.Objects.SQLSearchQuery;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.SQLParsers.ISQLParser;
@@ -11,6 +10,7 @@ import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.drivers.SQLiteDriver;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
+import org.mariuszgromada.math.mxparser.License;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,16 +21,17 @@ import java.util.HashMap;
 public class EstivatePersist {
 
     // Default, could be defined by config if multiple parsers are present.
-    private IObjectParser objectParser;
-    private ISQLParser SQLParser;
+    private final IObjectParser objectParser;
+    private final ISQLParser SQLParser;
     private config WorkingConfiguration;
-    private IDriverHandler sqlDriver;
+    private final IDriverHandler sqlDriver;
 
     public EstivatePersist(String relativeURL, Boolean debug) {
         this.objectParser = new ReflectionParser();
         this.sqlDriver = new SQLiteDriver(relativeURL, debug);
         this.SQLParser = new SQLParserTextConcatenation(sqlDriver);
         WorkingConfiguration = new config();
+        License.iConfirmNonCommercialUse("Estivate");
     }
 
     /**
