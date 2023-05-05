@@ -1,19 +1,9 @@
 package hiof.gruppe1.Estivate.SQLParsers.TextConcatenation;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class StringUtils {
-    static String getStringFromQuerySet(String get, ResultSet rs) {
-        try {
-            return rs.getString(get);
-        } catch (SQLException e) {
-            return null;
-        }
-    }
 
     static StringBuilder createCommaValues(ArrayList<String> values) {
         StringBuilder sb = new StringBuilder();
