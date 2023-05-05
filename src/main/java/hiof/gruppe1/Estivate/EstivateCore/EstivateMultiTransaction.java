@@ -2,6 +2,7 @@ package hiof.gruppe1.Estivate.EstivateCore;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
+import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import org.mariuszgromada.math.mxparser.Argument;
 import org.mariuszgromada.math.mxparser.Expression;
 
@@ -12,6 +13,12 @@ import java.util.HashMap;
  */
 public class EstivateMultiTransaction {
     SQLMultiCommand sqlMultiCommand;
+    IDriverHandler driverHandler;
+
+    public EstivateMultiTransaction(IDriverHandler driverHandler) {
+        this.driverHandler = driverHandler;
+    }
+
     HashMap<String, SQLAttribute> results = new HashMap<>();
 
     /**
@@ -20,7 +27,7 @@ public class EstivateMultiTransaction {
      * @return EstivateAggregateTransaction
      */
     public EstivateMultiTransaction getAggreagate() {
-        sqlMultiCommand = new SQLMultiCommand<>();
+        sqlMultiCommand = new SQLMultiCommand(driverHandler);
         return this;
     }
 
@@ -45,7 +52,11 @@ public class EstivateMultiTransaction {
      * @return EstivateMultiTransaction
      */
     public <T> EstivateMultiTransaction count(Class<T> workingClass, String condition, String resultName) {
-        // Create temporary SQLCommand, execute, return result to the result queue.
+        SQLMultiCommand temp = new SQLMultiCommand(driverHandler);
+        temp.addSelect("count(*)");
+        temp.retrieveClass(workingClass);
+        temp.addCondition(condition);
+        results.put(resultName, new SQLAttribute(int.class, temp.getIntValue()));
         return this;
     }
 
@@ -73,7 +84,8 @@ public class EstivateMultiTransaction {
         // Not sure if its gonna work, buth mathX is a library for parsing strings and create
         // Arguments out of the SQLAttributes here
         Expression exp = new Expression(command);
-        results.forEach((k, v) -> exp.addArguments(new Argument(k + " = " + v.getData())));
+
+        results.forEach((k, v) -> exp.addArguments(new Argument(k + " = " + v.getDataRaw())));
         return exp.calculate();
     }
 }

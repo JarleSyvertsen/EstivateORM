@@ -3,33 +3,15 @@ package hiof.gruppe1.Estivate.SQLParsers.TextConcatenation;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import static hiof.gruppe1.Estivate.SQLAdapters.TableDialectAttributeAdapter.convertToSQLDialect;
-import static hiof.gruppe1.Estivate.SQLParsers.TextConcatenation.SQLParserTextConcatenation.getObjectClass;
 import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 
 public class TextConcatTableManagement {
     IDriverHandler driver;
-    private String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
-    private String SELECT_FROM_SCHEMA = "SELECT name FROM sqlite_schema ";
-    private String WHERE = "WHERE ";
-    private String LIKE = "LIKE ";
-    private String NOT_LIKE = "NOT LIKE ";
-    private String AND = "AND ";
-    private String NAME = "name ";
-    private String LEFT_JOIN = "LEFT JOIN ";
-    private String UNDERSCORE = "_";
-    private String ON = " ON ";
-    private String EQUALS =  " = ";
-    private String PERIOD = ".";
-    private String ID = "id";
-    private String NEW_LINE = "\n";
-    private String ALTER_TABLE = "ALTER TABLE ";
-    private String ADD = "ADD ";
+    private final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
+    private final String ADD = "ADD ";
 
     public TextConcatTableManagement(IDriverHandler driver) {
         this.driver = driver;
@@ -92,25 +74,19 @@ public class TextConcatTableManagement {
         idMap.put(parentId, "INTEGER");
         idMap.put(childId, "INTEGER");
         attributes.append(String.format("\"%s\" %s,", "setter", "TEXT"));
-        idMap.forEach((k,v) -> {
-            attributes.append(String.format("\"%s\" %s,", k, v));
-        });
+        idMap.forEach((k,v) -> attributes.append(String.format("\"%s\" %s,", k, v)));
+        idMap.forEach((k,v) -> foreignKeys.append(String.format(" FOREIGN KEY (\"%s\") REFERENCES %s (\"%s_%s\") ON DELETE CASCADE", k, k, k, "id")));
 
-        idMap.forEach((k,v) -> {
-            foreignKeys.append(String.format(" FOREIGN KEY (\"%s\") REFERENCES %s (\"%s_%s\") ON DELETE CASCADE", k, k, k, "id"));
-        });
-
-        joiningString.append(CREATE_TABLE);
-        joiningString.append(parentId);
-        joiningString.append("_has_");
-        joiningString.append(childId);
-        joiningString.append(" ");
-        joiningString.append("(");
-        joiningString.append(attributes);
-        joiningString.append(foreignKeys);
-        joiningString.append(")");
-        joiningString.append(";");
-
+        joiningString.append(CREATE_TABLE)
+        .append(parentId)
+        .append("_has_")
+        .append(childId)
+        .append(" ")
+        .append("(")
+        .append(attributes)
+        .append(foreignKeys)
+        .append(")")
+        .append(";");
 
         return joiningString.toString();
     }
@@ -122,102 +98,32 @@ public class TextConcatTableManagement {
         String TABLE_NAME = String.format("\"%s\" ", tableName);
         String PRIMARY_KEY = String.format("PRIMARY KEY(\"%s_%s\" AUTOINCREMENT)", tableName, "id");
 
-        tableAttributes.forEach((k,v) -> {
-            attributes.append(String.format("\"%s\" %s,", k.toString(), v.toString()));
-        });
+        tableAttributes.forEach((k,v) -> attributes.append(String.format("\"%s\" %s,", k, v)));
 
-        query.append(CREATE_TABLE);
-        query.append(TABLE_NAME);
-        query.append("(");
-        query.append(attributes);
-        query.append(PRIMARY_KEY);
-        query.append(")");
-        query.append(";");
+        query.append(CREATE_TABLE)
+        .append(TABLE_NAME)
+        .append("(")
+        .append(attributes)
+        .append(PRIMARY_KEY)
+        .append(")")
+        .append(";");
 
         return query.toString();
-    }
-    private ArrayList<String> getRelatingTables(String className) {
-        ArrayList<String> relatedTables = new ArrayList<>();
-
-        StringBuilder selectRelatedTables = new StringBuilder();
-        selectRelatedTables.append(SELECT_FROM_SCHEMA);
-        selectRelatedTables.append(WHERE);
-        selectRelatedTables.append(NAME);
-        selectRelatedTables.append(LIKE);
-        selectRelatedTables.append(String.format("'%s%%'", className));
-        selectRelatedTables.append(AND);
-        selectRelatedTables.append(NAME);
-        selectRelatedTables.append(NOT_LIKE);
-        selectRelatedTables.append(String.format("'%s'", className));
-
-        ResultSet resultSet = driver.executeQuery(selectRelatedTables.toString());
-        try {
-            while (resultSet.next()) {
-                relatedTables.add(resultSet.getString("name"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e);
-        }
-        return relatedTables;
-    }
-    public ArrayList<String> getRelatedTables(String className) {
-        ArrayList<String> referencedTables = new ArrayList<>();
-        getRelatingTables(className).forEach((referenceTable) -> referencedTables.add(referenceTable.substring(referenceTable.lastIndexOf("_") + 1)));
-        return referencedTables;
-    }
-
-    public String createJoiningTables(String className) {
-        ArrayList<String> connectedTables = getRelatingTables(className);
-
-        StringBuilder joiningTableQuery = new StringBuilder();
-        connectedTables.forEach((complete_name) -> {
-            String referenced_table = complete_name.substring(complete_name.lastIndexOf("_") + 1);
-            String referencing_table = complete_name.substring(0,complete_name.indexOf("_"));
-            // Joining Table
-            joiningTableQuery.append(LEFT_JOIN);
-            joiningTableQuery.append(complete_name);
-            joiningTableQuery.append(ON);
-            joiningTableQuery.append(complete_name);
-            joiningTableQuery.append(PERIOD);
-            joiningTableQuery.append(referencing_table);
-            joiningTableQuery.append(EQUALS);
-            joiningTableQuery.append(referencing_table);
-            joiningTableQuery.append(PERIOD);
-            joiningTableQuery.append(referencing_table);
-            joiningTableQuery.append(UNDERSCORE);
-            joiningTableQuery.append(ID);
-
-
-            // Right-Table
-            joiningTableQuery.append(NEW_LINE);
-            joiningTableQuery.append(LEFT_JOIN);
-            joiningTableQuery.append(referenced_table);
-            joiningTableQuery.append(ON);
-            joiningTableQuery.append(referenced_table);
-            joiningTableQuery.append(PERIOD);
-            joiningTableQuery.append(referenced_table);
-            joiningTableQuery.append(UNDERSCORE);
-            joiningTableQuery.append(ID);
-            joiningTableQuery.append(EQUALS);
-            joiningTableQuery.append(complete_name);
-            joiningTableQuery.append(PERIOD);
-            joiningTableQuery.append(referenced_table);
-        });
-        return joiningTableQuery.toString();
     }
     public void appendMissingColumns(SQLWriteObject writeObject, HashMap<String, String> difference) {
         String tableName = writeObject.getAttributeList().get("class").getInnerName();
         StringBuilder alterOperation = new StringBuilder();
+        String ALTER_TABLE = "ALTER TABLE ";
         alterOperation.append(ALTER_TABLE);
         alterOperation.append(tableName);
-        difference.forEach((name,type) -> {
-            alterOperation.append("\n");
-            alterOperation.append(ADD);
-            alterOperation.append(name);
-            alterOperation.append(" ");
-            alterOperation.append(type);
-            alterOperation.append(";");
-        });
+
+        difference.forEach((name,type) -> alterOperation.append("\n")
+        .append(ADD)
+        .append(name)
+        .append(" ")
+        .append(type)
+        .append(";"));
+
         driver.executeNoReturnSplit(alterOperation.toString());
     }
 

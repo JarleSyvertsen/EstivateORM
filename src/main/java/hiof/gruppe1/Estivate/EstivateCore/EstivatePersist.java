@@ -10,6 +10,7 @@ import hiof.gruppe1.Estivate.drivers.IDriverHandler;
 import hiof.gruppe1.Estivate.drivers.SQLiteDriver;
 import hiof.gruppe1.Estivate.objectParsers.IObjectParser;
 import hiof.gruppe1.Estivate.objectParsers.ReflectionParser;
+import org.mariuszgromada.math.mxparser.License;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,20 +21,22 @@ import java.util.HashMap;
 public class EstivatePersist {
 
     // Default, could be defined by config if multiple parsers are present.
-    private IObjectParser objectParser;
-    private ISQLParser SQLParser;
+    private final IObjectParser objectParser;
+    private final ISQLParser SQLParser;
     private config WorkingConfiguration;
-    private IDriverHandler sqlDriver;
+    private final IDriverHandler sqlDriver;
 
     public EstivatePersist(String relativeURL, Boolean debug) {
-        this.objectParser  = new ReflectionParser();
+        this.objectParser = new ReflectionParser();
         this.sqlDriver = new SQLiteDriver(relativeURL, debug);
         this.SQLParser = new SQLParserTextConcatenation(sqlDriver);
-        WorkingConfiguration  = new config();
+        WorkingConfiguration = new config();
+        License.iConfirmNonCommercialUse("Estivate");
     }
 
     /**
      * Persist serves as the primary function to store arbitary objects to database. The object will be divided into primitives (stored in a table with the same name, unless overwritten via config), and embedded objects will be stored in their respective table, with a many-to-many relationship by default.
+     *
      * @param object
      * @return Boolean
      */
@@ -47,11 +50,11 @@ public class EstivatePersist {
 
     /**
      * getOne allows for fetching singular objects when the ID of the object is known. A class object is provided both to determine which class to cast to, but also which table to query. This class-table association can be overwritten in config if needed.
+     *
      * @param id
      * @param output
-     * @return Object of type <T>
      * @param <T>
-     *
+     * @return Object of type <T>
      */
     public <T> T getOne(int id, Class<T> output) {
         return SQLParser.readFromDatabase(output, id);
@@ -59,19 +62,20 @@ public class EstivatePersist {
 
     /**
      * getAll allows one to fetch all elements of a given class. The given class is used to determine which table to query, if this is insufficent, this association can be overwritten in config.
+     *
      * @param output
-     * @return ArrayList<Class>
      * @param <T>
+     * @return ArrayList<Class>
      */
     public <T> ArrayList<T> getAll(Class<T> output) {
         return SQLParser.readFromDatabase(output);
     }
 
     /**
+     * Get many serves as the primary function for more complex queries, built up via a builder-pattern of commands registered on the SQLSearchQuery object. Each object that is fetched through this function will be cast to the given class and stored in a new object of the given format.
      *
-     Get many serves as the primary function for more complex queries, built up via a builder-pattern of commands registered on the SQLSearchQuery object. Each object that is fetched through this function will be cast to the given class and stored in a new object of the given format.
-     * @return SQLSearchQuery queries
      * @param <T>
+     * @return SQLSearchQuery queries
      */
     public <T> SQLSearchQuery getMany() {
         return null;
@@ -79,10 +83,16 @@ public class EstivatePersist {
 
     /**
      * Used when the user want to make use of the SQL transaction to wrap multiple commands into a batch, and atomically resolve all operations together.
+     *
      * @return EstivateTransaction
      */
     public EstivateTransaction startTransaction() {
         return new EstivateTransaction().startTransaction();
     }
+
+    public EstivateMultiTransaction startAggregateTransaction() {
+        return new EstivateMultiTransaction(sqlDriver);
+    }
+
 }
 
