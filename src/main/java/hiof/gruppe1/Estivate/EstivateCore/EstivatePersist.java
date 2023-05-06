@@ -77,21 +77,17 @@ public class EstivatePersist {
      * @param <T>
      * @return SQLSearchQuery queries
      */
-    public <T> SQLSearchQuery getMany() {
-        return null;
+    public SQLSearchQuery getMany() {
+        return new SQLSearchQuery(SQLParser);
     }
 
     /**
      * Used when the user want to make use of the SQL transaction to wrap multiple commands into a batch, and atomically resolve all operations together.
-     *
+     * Specifically useful for aggregateTransactions.
      * @return EstivateTransaction
      */
-    public EstivateTransaction startTransaction() {
-        return new EstivateTransaction().startTransaction();
-    }
-
-    public EstivateMultiTransaction startAggregateTransaction() {
-        return new EstivateMultiTransaction(sqlDriver);
+    public EstivateTransaction startAggregate() {
+        return new EstivateTransaction(sqlDriver);
     }
 
 }

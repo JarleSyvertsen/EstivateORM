@@ -7,7 +7,7 @@ public class WriteBuilder {
     private final String INSERT_INTO = "INSERT OR REPLACE INTO ";
     private final String VALUES = " VALUES ";
 
-    String createInsertStatement(String tableName, String insertTable, SQLWriteObject writeObjectSimple) {
+    String createInsertStatement(String insertTable, SQLWriteObject writeObjectSimple) {
         StringBuilder finalString = new StringBuilder();
         StringBuilder keyString = new StringBuilder();
         StringBuilder valuesString = new StringBuilder();
@@ -18,8 +18,6 @@ public class WriteBuilder {
 
         writeObjectSimple.getAttributeList().forEach((k, v) -> {
             keyString.append("\"");
-            keyString.append(tableName);
-            keyString.append("_");
             keyString.append(k);
             keyString.append("\"");
             keyString.append(",");
@@ -31,8 +29,6 @@ public class WriteBuilder {
         finalString.append(VALUES);
         finalString.append(StringUtils.createValuesInParenthesis(valuesString));
         finalString.append(" RETURNING ");
-        finalString.append(tableName);
-        finalString.append("_");
         finalString.append("id");
         finalString.append(";");
 

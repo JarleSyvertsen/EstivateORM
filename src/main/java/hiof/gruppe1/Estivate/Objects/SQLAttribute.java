@@ -16,7 +16,7 @@ public class SQLAttribute {
     }
 
     public <T> T getDataCast(Class<T> typeToCast) {
-        return (T) typeToCast.cast(object);
+        return typeToCast.cast(object);
     }
     public String getInnerName() {
         // getClass will simply defer to the general object class, so we need to use toString and format it ourselves.

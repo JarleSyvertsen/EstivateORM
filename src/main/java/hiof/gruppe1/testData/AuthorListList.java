@@ -4,7 +4,6 @@ public class AuthorListList {
     private int id;
     private String aaah;
     private AuthorList authorList;
-
     public AuthorListList() {
     }
 

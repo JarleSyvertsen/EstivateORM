@@ -8,32 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 // Backend command object to be parsed. Built via the "frontend" EstivateMultiTransaction.
-public class SQLMultiCommand {
-    private IDriverHandler driver;
-    private ArrayList<String> selectAttributes = new ArrayList<>();
-    private String primaryTable;
-    private Queue<String> whereStatements = new LinkedList<>();
-    private Class<?> outputClass;
-    private String outputFormat;
-
-    private final String SELECT = "SELECT ";
-    private final String FROM = "FROM ";
-
-    public String createFullQuery() {
-        StringBuilder fullQuery = new StringBuilder();
-        fullQuery.append(SELECT);
-        selectAttributes.forEach((selector) -> fullQuery.append(selector).append(","));
-        fullQuery.deleteCharAt(fullQuery.length() - 1).append(" ");
-
-        fullQuery.append(FROM).append(primaryTable);
-
-        if(!whereStatements.isEmpty()) {
-            whereStatements.forEach((statement) -> fullQuery.append(statement).append(","));
-            fullQuery.deleteCharAt(fullQuery.length() - 1);
-        }
-
-        return fullQuery.toString();
-    }
+public class SQLMultiCommand extends SQLQueryBase {
+    private final IDriverHandler driver;
 
     public SQLMultiCommand(IDriverHandler driver) {
         this.driver = driver;
@@ -60,7 +36,6 @@ public class SQLMultiCommand {
         if(condition == null || condition.equals("")) {
             return;
         }
-
         whereStatements.add(condition);
     }
 
