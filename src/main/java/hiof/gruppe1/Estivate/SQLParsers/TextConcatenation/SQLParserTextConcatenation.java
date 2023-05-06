@@ -1,7 +1,6 @@
 package hiof.gruppe1.Estivate.SQLParsers.TextConcatenation;
 
 import hiof.gruppe1.Estivate.Objects.SQLAttribute;
-import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
 import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
 import hiof.gruppe1.Estivate.SQLParsers.ISQLParser;
 import hiof.gruppe1.Estivate.drivers.IDriverHandler;
@@ -45,15 +44,13 @@ public class SQLParserTextConcatenation implements ISQLParser {
         if (writeObject.getAttributeList().get("id").getData().toString().equals("0")) {
             writeObject.getAttributeList().remove("id");
         }
-
         String tableName = writeObject.getAttributeList().get("class").getInnerName();
-        String insertTable = getObjectClass(writeObject);
         writeObject.getAttributeList().remove("class");
 
         SQLWriteObject writeObjectSimple = createCopyNonPrimitives(writeObject);
-        String finalString = writeBuilder.createInsertStatement(tableName, insertTable, writeObjectSimple);
+        String finalString = writeBuilder.createInsertStatement(tableName,writeObjectSimple);
 
-        int parentId = executeGetId(tableName, finalString);
+        int parentId = executeGetId(finalString);
         traverseNonPrimitives(writeObject, tableName, parentId);
 
         return String.valueOf(parentId);
@@ -163,11 +160,11 @@ public class SQLParserTextConcatenation implements ISQLParser {
         return -1;
     }
 
-    private int executeGetId(String tableName, String executingString) {
+    private int executeGetId(String executingString) {
         int id;
         try {
             ResultSet rs = sqlDriver.executeQuery(executingString);
-            id = rs.getInt(tableName + "_" + "id");
+            id = rs.getInt("id");
             rs.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);

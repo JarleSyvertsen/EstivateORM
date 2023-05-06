@@ -19,10 +19,9 @@ public class TextConcatTableManagement {
 
     private HashMap<String, String> getWriteDescription(SQLWriteObject writeObject) {
         HashMap<String, String> writeObjectDescription = new HashMap<>();
-        String tableName = writeObject.getAttributeList().get("class").getInnerName();
         writeObject.getAttributeList().forEach((k, v) -> {
             if(isSimple(v.getData().getClass())) {
-                writeObjectDescription.put(tableName + "_" + k, convertToSQLDialect(v.getData().getClass(), driver.getDialect()));
+                writeObjectDescription.put(k, convertToSQLDialect(v.getData().getClass(), driver.getDialect()));
             }
         });
         return writeObjectDescription;
@@ -75,7 +74,7 @@ public class TextConcatTableManagement {
         idMap.put(childId, "INTEGER");
         attributes.append(String.format("\"%s\" %s,", "setter", "TEXT"));
         idMap.forEach((k,v) -> attributes.append(String.format("\"%s\" %s,", k, v)));
-        idMap.forEach((k,v) -> foreignKeys.append(String.format(" FOREIGN KEY (\"%s\") REFERENCES %s (\"%s_%s\") ON DELETE CASCADE", k, k, k, "id")));
+        idMap.forEach((k,v) -> foreignKeys.append(String.format(" FOREIGN KEY (\"%s\") REFERENCES %s (\"%s\") ON DELETE CASCADE", k, k, "id")));
 
         joiningString.append(CREATE_TABLE)
         .append(parentId)
@@ -96,7 +95,7 @@ public class TextConcatTableManagement {
         StringBuilder query = new StringBuilder();
 
         String TABLE_NAME = String.format("\"%s\" ", tableName);
-        String PRIMARY_KEY = String.format("PRIMARY KEY(\"%s_%s\" AUTOINCREMENT)", tableName, "id");
+        String PRIMARY_KEY = String.format("PRIMARY KEY(\"%s\" AUTOINCREMENT)", "id");
 
         tableAttributes.forEach((k,v) -> attributes.append(String.format("\"%s\" %s,", k, v)));
 

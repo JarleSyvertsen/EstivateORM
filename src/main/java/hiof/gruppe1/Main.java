@@ -25,20 +25,17 @@ public class Main {
         perPer.setName("Per Per");
         perArne.setFavoriteFood(pizza);
         AuthorList authorList = new AuthorList();
+        AuthorListList all = new AuthorListList();
 
         authorList.setTopAuthor(perArne);
         authorList.setName("TopList");
+        all.setAuthorList(authorList);
 
-        Double averagePagePerAuthor =
-                persist.startAggregate()
-                .count(Author.class, null, "cAuthors")
-                .count(Page.class, null, "cPages")
-                .result("cPages / cAuthors");
-
-        System.out.println(averagePagePerAuthor);
-         ArrayList<Author> id2 = persist.getMany()
-                 .addCondition("WHERE author_name = 'Per Arne'")
-                 .asArrayList(Author.class);
-        System.out.println(id2);
+        all.setAaah("Eh");
+        persist.persist(all);
+         ArrayList<AuthorListList> id1 = persist.getMany()
+                 .addCondition("WHERE aaah = 'Eh'")
+                 .asArrayList(AuthorListList.class);
+        System.out.println(id1);
     }
 }

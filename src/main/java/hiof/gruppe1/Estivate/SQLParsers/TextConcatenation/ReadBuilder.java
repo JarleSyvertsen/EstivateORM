@@ -11,8 +11,6 @@ public class ReadBuilder {
     protected String createReadableSQLString(Class queryClass, int id) {
         StringBuilder limiter = new StringBuilder();
         limiter.append(WHERE);
-        limiter.append(queryClass.getSimpleName());
-        limiter.append("_");
         limiter.append(ID_EQUALS);
         limiter.append(id);
         return createReadableSQLString(queryClass, limiter.toString());
