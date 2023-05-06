@@ -4,6 +4,8 @@ import hiof.gruppe1.Estivate.EstivateCore.EstivatePersist;
 import hiof.gruppe1.Estivate.objectBuilders.EstivateBuilder;
 import hiof.gruppe1.testData.*;
 
+import java.util.ArrayList;
+
 public class Main {
     public static void main(String[] args) {
         EstivateBuilder estivateBuilder = new EstivateBuilder();
@@ -28,11 +30,15 @@ public class Main {
         authorList.setName("TopList");
 
         Double averagePagePerAuthor =
-                persist.startAggregateTransaction()
+                persist.startAggregate()
                 .count(Author.class, null, "cAuthors")
                 .count(Page.class, null, "cPages")
                 .result("cPages / cAuthors");
 
         System.out.println(averagePagePerAuthor);
+         ArrayList<Author> id2 = persist.getMany()
+                 .addCondition("WHERE author_name = 'Per Arne'")
+                 .asArrayList(Author.class);
+        System.out.println(id2);
     }
 }

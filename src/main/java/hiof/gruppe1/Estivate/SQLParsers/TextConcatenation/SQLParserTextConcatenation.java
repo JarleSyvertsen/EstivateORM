@@ -34,17 +34,8 @@ public class SQLParserTextConcatenation implements ISQLParser {
         this.readBuilder = new ReadBuilder();
     }
 
-    public static String getObjectClass(SQLWriteObject writeObject) {
-        return writeObject.getAttributeList().get("class").getInnerName();
-    }
-
-    public Boolean writeToDatabase(SQLMultiCommand multiCommand) {
-        return false;
-    }
-
     public Boolean writeToDatabase(SQLWriteObject writeObject) {
-        String writeableString = writeObjectToDatabase(writeObject);
-      //  sqlDriver.executeNoReturnSplit(writeableString);
+        writeObjectToDatabase(writeObject);
         return true;
     }
 
@@ -88,48 +79,22 @@ public class SQLParserTextConcatenation implements ISQLParser {
         HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
 
-        HashMap<String, SQLAttribute> readAttributes = getAttributeMap(describedTable, querySet);
-        HashMap<String, SQLAttribute> attributeHashMap = getAttributeMap(describedTable, querySet);
-
-        int parentId = attributeHashMap.get("id").getData();
-
-        T object = objectParser.parseAttributeListToObject(castTo, readAttributes);
-        HashMap<String, Class<?>> subElementList = objectParser.getSubElementList(object);
-        subElementList.forEach((k,v) -> {
-            int childId = getChildId(castTo, parentId, k, v);
-            if (childId > 0) {
-                objectParser.addElementToObject(object, readFromDatabase(v, childId), k);
-            }
-        });
-
-        return object;
+        return objectFromQuerySet(castTo, describedTable, querySet);
     }
+
 
     public <T> ArrayList<T> readFromDatabase(Class<T> castTo) {
         String SQLQuery = readBuilder.createReadableSQLString(castTo);
-        HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
+        return objectsFromQuerySet(castTo, SQLQuery);
+    }
 
-        ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
-
-        ArrayList<T> arrayOfObjects = new ArrayList<>();
-        try {
-            while (querySet.next()) {
-                HashMap<String, SQLAttribute> attributeHashMap = getAttributeMap(describedTable, querySet);
-                int parentId = attributeHashMap.get("id").getData();
-                T object = objectParser.parseAttributeListToObject(castTo, attributeHashMap);
-                HashMap<String, Class<?>> subElementList = objectParser.getSubElementList(object);
-                subElementList.forEach((k,v) -> {
-                    int childId = getChildId(castTo, parentId, k, v);
-                    if(childId > 0) {
-                        objectParser.addElementToObject(object, readFromDatabase(v, childId), k);
-                    }
-                });
-                arrayOfObjects.add(object);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public <T> ArrayList<T> readFromDatabase(Class<T> castTo, String conditional) {
+        if(!conditional.startsWith(" ")) {
+            conditional = " " + conditional;
         }
-        return arrayOfObjects;
+
+        String SQLQuery = readBuilder.createReadableSQLString(castTo, conditional);
+        return objectsFromQuerySet(castTo, SQLQuery);
     }
 
     private static HashMap<String, SQLAttribute> getAttributeMap(HashMap<String, String> describedTable, ResultSet querySet) {
@@ -151,6 +116,39 @@ public class SQLParserTextConcatenation implements ISQLParser {
             throw new RuntimeException(e);
         }
         return readAttributes;
+    }
+
+    private <T> T objectFromQuerySet(Class<T> castTo, HashMap<String, String> describedTable, ResultSet querySet) {
+        HashMap<String, SQLAttribute> attributeHashMap = getAttributeMap(describedTable, querySet);
+
+        int parentId = attributeHashMap.get("id").getData();
+
+        T object = objectParser.parseAttributeListToObject(castTo, attributeHashMap);
+        HashMap<String, Class<?>> subElementList = objectParser.getSubElementList(object);
+        subElementList.forEach((k,v) -> {
+            int childId = getChildId(castTo, parentId, k, v);
+            if (childId > 0) {
+                objectParser.addElementToObject(object, readFromDatabase(v, childId), k);
+            }
+        });
+        return object;
+    }
+
+
+    private <T> ArrayList<T> objectsFromQuerySet(Class<T> castTo, String SQLQuery) {
+        HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
+
+        ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
+
+        ArrayList<T> arrayOfObjects = new ArrayList<>();
+        try {
+            while (querySet.next()) {
+                arrayOfObjects.add(objectFromQuerySet(castTo, describedTable, querySet));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return arrayOfObjects;
     }
 
 
@@ -181,5 +179,9 @@ public class SQLParserTextConcatenation implements ISQLParser {
         SQLWriteObject simple = new SQLWriteObject(new HashMap<>(completeObject.getAttributeList()));
         simple.getAttributeList().entrySet().removeIf(entry -> !isSimple(entry.getValue().getData().getClass()));
         return simple;
+    }
+
+    public static String getObjectClass(SQLWriteObject writeObject) {
+        return writeObject.getAttributeList().get("class").getInnerName();
     }
 }

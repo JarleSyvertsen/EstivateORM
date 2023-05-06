@@ -1,38 +1,91 @@
 package hiof.gruppe1.Estivate.EstivateCore;
 
+import hiof.gruppe1.Estivate.Objects.SQLAttribute;
 import hiof.gruppe1.Estivate.Objects.SQLMultiCommand;
-import hiof.gruppe1.Estivate.Objects.SQLSearchQuery;
-import hiof.gruppe1.Estivate.Objects.SQLWriteObject;
+import hiof.gruppe1.Estivate.drivers.IDriverHandler;
+import org.mariuszgromada.math.mxparser.Argument;
+import org.mariuszgromada.math.mxparser.Expression;
 
-import java.sql.Connection;
-import java.util.Queue;
+import java.util.HashMap;
 
 /**
- * An object returned from startTransaction function, supports persist, and getMany/getAggregate to make use of other functions in the ORM. These commands are queued up, and executed in one transaction when execute() is called.
+ * Multitransaction is a secondary namespace where transactions that spans across tables is supported. In addition, functions pertaining to aggregate data is located here.
  */
 public class EstivateTransaction {
-    Queue<SQLWriteObject> writeObjects;
-    Queue<SQLMultiCommand> multiCommands;
-    Queue<SQLSearchQuery> searchQueries;
+    SQLMultiCommand sqlMultiCommand;
+    IDriverHandler driverHandler;
 
-    Connection connection;
+    public EstivateTransaction(IDriverHandler driverHandler) {
+        this.driverHandler = driverHandler;
+    }
 
-    public EstivateTransaction startTransaction() {
-        // SQL Start transaction
+    HashMap<String, SQLAttribute> results = new HashMap<>();
+
+    /**
+     * getAggregate serves as a way to initialize a new transaction, and is thus preferred when starting a transaction of this kind.
+     *
+     * @return EstivateAggregateTransaction
+     */
+    public EstivateTransaction getAggreagate() {
+        sqlMultiCommand = new SQLMultiCommand(driverHandler);
         return this;
     }
 
-    public void persist(Object object) {
-        return;
+    /**
+     * If the function generates more than one result, users can define which data structure to return. If none is defined, an Array is used as default.
+     *
+     * @param format (LinkedList, ArrayList, HashMap, Array, HashSet)
+     * @return EstivateMultiTransaction
+     */
+    public EstivateTransaction retrieveFormat(String format) {
+        sqlMultiCommand.retrieveFormat(format);
+        return this;
     }
 
-    public SQLSearchQuery getMany() {return null;}
-    public SQLMultiCommand getAggregate() {return null;}
-    public void commit() {
+    /**
+     * Counts the given rows of a query, and stores is into an internal result with the name given in resultName. This name can then be refered to via the result function later. The class parameter is used to find which table to search (can be changed via config), and the string condition allows users to append conditions to use when fetching in the given table.
+     *
+     * @param workingClass
+     * @param condition
+     * @param resultName
+     * @param <T>
+     * @return EstivateMultiTransaction
+     */
+    public <T> EstivateTransaction count(Class<T> workingClass, String condition, String resultName) {
+        SQLMultiCommand temp = new SQLMultiCommand(driverHandler);
+        temp.addSelect("count(*)");
+        temp.retrieveClass(workingClass);
+        temp.addCondition(condition);
+        results.put(resultName, new SQLAttribute(int.class, temp.getIntValue()));
+        return this;
     }
 
-    public void endTransaction() {
-        // End transaction
-        // Could empty out variables as well, considering this object should not be reused.
+    /**
+     * Sums the value of a given table using the sumField parameter to define which column to search. The parameter tableClass is used to find which table to query, additionally using condition to restrict the amount of rows used in the result. The sum is stored into resultName, for later use in the result function.
+     *
+     * @param workingClass
+     * @param condition
+     * @param sumColumn
+     * @param resultName
+     * @param <T>
+     * @return EstivateMultiTransaction
+     */
+    public <T> EstivateTransaction sumFields(Class<T> workingClass, String condition, String sumColumn, String resultName) {
+        return this;
+    }
+
+    /**
+     * Takes a string in the form of mathematical equation. Here, the user refer to the resultNames previously defined. The result of the operation is returned as a single value.
+     *
+     * @param command
+     * @return Double result
+     */
+    public double result(String command) {
+        // Not sure if its gonna work, buth mathX is a library for parsing strings and create
+        // Arguments out of the SQLAttributes here
+        Expression exp = new Expression(command);
+
+        results.forEach((k, v) -> exp.addArguments(new Argument(k + " = " + v.getDataRaw())));
+        return exp.calculate();
     }
 }
