@@ -13,16 +13,14 @@ import static hiof.gruppe1.Estivate.utils.simpleTypeCheck.isSimple;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-
 public class SQLParserTextConcatenation implements ISQLParser {
     private final IDriverHandler sqlDriver;
     private final IObjectParser objectParser;
     private final WriteBuilder writeBuilder;
     private final ReadBuilder readBuilder;
-
     private final TextConcatTableManagement tableManagement;
 
     public SQLParserTextConcatenation(IDriverHandler sqlDriver) {
@@ -58,6 +56,10 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     private void traverseNonPrimitives(SQLWriteObject writeObject, String parentNameSimple, int parentId) {
         writeObject.getAttributeList().forEach((k, v) -> {
+           if (isCollection(v.getData().getClass())) {
+               return;
+            }
+
             if (!isSimple(v.getData().getClass())) {
                 HashMap<String, SQLAttribute> parsedAttributes = objectParser.parseObjectToAttributeList(v.getDataRaw());
                 SQLWriteObject recursiveObject = new SQLWriteObject(parsedAttributes);
@@ -180,5 +182,9 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     public static String getObjectClass(SQLWriteObject writeObject) {
         return writeObject.getAttributeList().get("class").getInnerName();
+    }
+
+    public static boolean isCollection(Class c) {
+        return Collection.class.isAssignableFrom(c) || Map.class.isAssignableFrom(c);
     }
 }
