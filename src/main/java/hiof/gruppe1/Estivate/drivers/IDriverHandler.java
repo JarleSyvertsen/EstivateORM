@@ -7,7 +7,7 @@ public interface IDriverHandler {
     public ResultSet executeQuery(String query);
     public void executeNoReturn(String query);
     public void executeNoReturnSplit(String query);
-    public HashMap<String, String> describeTable(Class classOfTable);
+    public HashMap<String, String> describeTable(Class<?> classOfTable);
     public ResultSet executeQueryIgnoreNoTable(String query);
     public String getDialect();
 

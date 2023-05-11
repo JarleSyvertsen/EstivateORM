@@ -1,5 +1,7 @@
 package hiof.gruppe1.testData;
 
+import java.util.ArrayList;
+
 public class Author {
     private int id;
     private String name;
@@ -9,9 +11,21 @@ public class Author {
 
     private Page leastFavoritePage;
     private Food favoriteFood;
-
+    private ArrayList<Page> pages = new ArrayList<>();
     public Food getFavoriteFood() {
         return favoriteFood;
+    }
+
+    public ArrayList<Page> getPages() {
+        return pages;
+    }
+
+    public void setPages(ArrayList<Page> pages) {
+        this.pages = pages;
+    }
+
+    public void addPage(Page page) {
+        pages.add(page);
     }
 
     public void setFavoriteFood(Food favoriteFood) {
