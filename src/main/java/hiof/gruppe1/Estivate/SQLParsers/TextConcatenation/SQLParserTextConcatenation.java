@@ -42,6 +42,7 @@ public class SQLParserTextConcatenation implements ISQLParser {
         if (writeObject.getAttributeList().get("id").getData().toString().equals("0")) {
             writeObject.getAttributeList().remove("id");
         }
+
         String tableName = writeObject.getAttributeList().get("class").getInnerName();
         writeObject.getAttributeList().remove("class");
 
@@ -57,20 +58,25 @@ public class SQLParserTextConcatenation implements ISQLParser {
     private void traverseNonPrimitives(SQLWriteObject writeObject, String parentNameSimple, int parentId) {
         writeObject.getAttributeList().forEach((k, v) -> {
            if (isCollection(v.getData().getClass())) {
-               return;
+                Collection<?> collection = v.getData();
+                collection.forEach((obj) -> persistSubElement(parentNameSimple, parentId, k, new SQLAttribute(obj.getClass(), obj)) );
+                return;
             }
-
             if (!isSimple(v.getData().getClass())) {
-                HashMap<String, SQLAttribute> parsedAttributes = objectParser.parseObjectToAttributeList(v.getDataRaw());
-                SQLWriteObject recursiveObject = new SQLWriteObject(parsedAttributes);
-                String objectClass = getObjectClass(recursiveObject);
-
-                tableManagement.createAppendingTableIfMissing(parentNameSimple, objectClass, true);
-                String childId = writeObjectToDatabase(recursiveObject);
-                String recursiveRelationship = writeBuilder.createRelationshipInsert(k, parentNameSimple, objectClass, String.valueOf(parentId), childId);
-                sqlDriver.executeNoReturnSplit(recursiveRelationship);
+                persistSubElement(parentNameSimple, parentId, k, v);
             }
         });
+    }
+
+    private void persistSubElement(String parentNameSimple, int parentId, String key, SQLAttribute value) {
+        HashMap<String, SQLAttribute> parsedAttributes = objectParser.parseObjectToAttributeList(value.getDataRaw());
+        SQLWriteObject recursiveObject = new SQLWriteObject(parsedAttributes);
+        String objectClass = getObjectClass(recursiveObject);
+
+        tableManagement.createAppendingTableIfMissing(parentNameSimple, objectClass, true);
+        String childId = writeObjectToDatabase(recursiveObject);
+        String recursiveRelationship = writeBuilder.createRelationshipInsert(key, parentNameSimple, objectClass, String.valueOf(parentId), childId);
+        sqlDriver.executeNoReturnSplit(recursiveRelationship);
     }
 
     public <T> T readFromDatabase(Class<T> castTo, int id) {
@@ -80,7 +86,6 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
         return objectFromQuerySet(castTo, describedTable, querySet);
     }
-
 
     public <T> ArrayList<T> readFromDatabase(Class<T> castTo) {
         String SQLQuery = readBuilder.createReadableSQLString(castTo);
@@ -119,12 +124,20 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     private <T> T objectFromQuerySet(Class<T> castTo, HashMap<String, String> describedTable, ResultSet querySet) {
         HashMap<String, SQLAttribute> attributeHashMap = getAttributeMap(describedTable, querySet);
-
         int parentId = attributeHashMap.get("id").getData();
 
         T object = objectParser.parseAttributeListToObject(castTo, attributeHashMap);
         HashMap<String, Class<?>> subElementList = objectParser.getSubElementList(object);
         subElementList.forEach((k,v) -> {
+            if(isCollection(v)) {
+                Class<?> collectionClass = objectParser.getCollectionInnerClass(object, k);
+                for (int childId : getChildIds(castTo, parentId, k, collectionClass)) {
+                    objectParser.addElementsToCollectionQueue(object, readFromDatabase(collectionClass, childId), k);
+                }
+                objectParser.writeToCollection(object, v, k);
+                return;
+            }
+
             int childId = getChildId(castTo, parentId, k, v);
             if (childId > 0) {
                 objectParser.addElementToObject(object, readFromDatabase(v, childId), k);
@@ -160,6 +173,21 @@ public class SQLParserTextConcatenation implements ISQLParser {
             return -1;
         }
         return -1;
+    }
+
+    private <T> ArrayList<Integer> getChildIds(Class<T> parentClass, int parentId, String setter, Class<?> childClass) {
+        ArrayList<Integer> ids = new ArrayList<>();
+        try (ResultSet resultSet = sqlDriver.executeQueryIgnoreNoTable(readBuilder.getIdOfSubElement(setter, childClass.getSimpleName(), parentClass.getSimpleName(), parentId))) {
+            if(resultSet != null) {
+             while(resultSet.next()) {
+                 ids.add(resultSet.getInt(1));
+             }
+             return ids;
+            }
+        } catch (SQLException e) {
+            return ids;
+        }
+        return ids;
     }
 
     private int executeGetId(String executingString) {
