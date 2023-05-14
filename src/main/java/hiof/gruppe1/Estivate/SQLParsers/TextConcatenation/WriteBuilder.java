@@ -15,6 +15,12 @@ public class WriteBuilder {
         // Appends
         finalString.append(INSERT_INTO);
         finalString.append(insertTable);
+        // If no values are present, we need to at least input the value id as default, to not
+        // provide a broken query.
+        if(writeObjectSimple.getAttributeList().size() == 0) {
+            keyString.append("\"id\",");
+            valuesString.append("null ");
+        }
 
         writeObjectSimple.getAttributeList().forEach((k, v) -> {
             keyString.append("\"");
@@ -24,10 +30,11 @@ public class WriteBuilder {
             valuesString.append(StringUtils.createWritableValue(v));
             valuesString.append(",");
         });
-
         finalString.append(StringUtils.createValuesInParenthesis(keyString));
         finalString.append(VALUES);
         finalString.append(StringUtils.createValuesInParenthesis(valuesString));
+
+
         finalString.append(" RETURNING ");
         finalString.append("id");
         finalString.append(";");

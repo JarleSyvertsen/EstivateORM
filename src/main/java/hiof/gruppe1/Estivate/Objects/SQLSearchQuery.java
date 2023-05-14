@@ -9,7 +9,7 @@ public class SQLSearchQuery extends SQLQueryBase {
     public SQLSearchQuery(ISQLParser parser) {
         this.parser = parser;
     }
-    public SQLSearchQuery addCondition(String condition) {
+    public SQLSearchQuery where(String condition) {
         whereStatements.add(condition);
         return this;
     }
