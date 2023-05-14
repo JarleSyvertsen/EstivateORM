@@ -8,8 +8,6 @@ import java.util.Queue;
 
 public class SQLQueryBase {
 
-    private final String SELECT = "SELECT ";
-    private final String FROM = "FROM ";
     protected ISQLParser parser;
     protected String primaryTable;
     protected ArrayList<String> selectAttributes = new ArrayList<>();
@@ -18,6 +16,12 @@ public class SQLQueryBase {
     protected String outputFormat;
 
     protected String createFullQuery() {
+        final String SELECT = "SELECT ";
+        final String FROM = "FROM ";
+        final String WHERE = "WHERE ";
+        final String AND = " AND ";
+
+
         StringBuilder fullQuery = new StringBuilder();
         if(!selectAttributes.isEmpty()) {
             fullQuery.append(SELECT);
@@ -27,11 +31,9 @@ public class SQLQueryBase {
         }
 
         if(!whereStatements.isEmpty()) {
-            fullQuery.append("WHERE ");
-            whereStatements.forEach((statement) -> fullQuery.append(statement).append(" AND "));
-            int lengthOfLast = 5;
-
-            for(int i = 0; i < lengthOfLast; i++) {
+            fullQuery.append(WHERE);
+            whereStatements.forEach((statement) -> fullQuery.append(statement).append(AND));
+            for(int i = 0; i < AND.length(); i++) {
                 fullQuery.deleteCharAt(fullQuery.length() - 1);
             }
         }
