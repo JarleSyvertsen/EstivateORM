@@ -27,8 +27,13 @@ public class SQLQueryBase {
         }
 
         if(!whereStatements.isEmpty()) {
-            whereStatements.forEach((statement) -> fullQuery.append(statement).append(","));
-            fullQuery.deleteCharAt(fullQuery.length() - 1);
+            fullQuery.append("WHERE ");
+            whereStatements.forEach((statement) -> fullQuery.append(statement).append(" AND "));
+            int lengthOfLast = 5;
+
+            for(int i = 0; i < lengthOfLast; i++) {
+                fullQuery.deleteCharAt(fullQuery.length() - 1);
+            }
         }
 
         return fullQuery.toString();
