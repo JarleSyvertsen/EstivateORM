@@ -42,10 +42,7 @@ public class SQLiteDriver implements IDriverHandler {
     }
 
     public void executeNoReturnSplit(String query) {
-        if(debug) {
-            System.out.println("query: \n" + query);
-            return;
-        }
+        outputDebugIfSet(query);
 
         String[] splitQuery = query.split(";");
         int i = -1;
@@ -62,10 +59,7 @@ public class SQLiteDriver implements IDriverHandler {
         }
     }
     public void executeNoReturn(String query) {
-        if(debug) {
-            System.out.println("query: \n" + query);
-            return;
-        }
+        outputDebugIfSet(query);
         try {
             Connection connection = connect();
             PreparedStatement executeStatement = connection.prepareStatement(query);
@@ -80,10 +74,10 @@ public class SQLiteDriver implements IDriverHandler {
         String executingQuery = query;
         // Creating an empty rs is non-trivial, we instead rely on an empty search
         // Though in practice, this should be handled without hitting the database.
-        if(debug) {
-            System.out.println("query: \n" + query);
-            executingQuery = "SELECT 1 WHERE false";
-        }
+        //if(debug) {
+        //    System.out.println("query: \n" + query);
+        //    executingQuery = "SELECT 1 WHERE false";
+        //}
         Connection connection = connect();
         PreparedStatement selectStatement = connection.prepareStatement(executingQuery);
         rs = selectStatement.executeQuery();
@@ -91,6 +85,7 @@ public class SQLiteDriver implements IDriverHandler {
     }
 
     public ResultSet executeQuery(String query) {
+        outputDebugIfSet(query);
         try {
             return executeQueryBase(query);
         } catch (SQLException e) {
@@ -98,14 +93,17 @@ public class SQLiteDriver implements IDriverHandler {
         }
         return null;
     }
+
+
+
     public ResultSet executeQueryIgnoreNoTable(String query) {
+        outputDebugIfSet(query);
         try {
            return executeQueryBase(query);
         } catch (SQLException e) {
         }
         return null;
     }
-
 
     @Override
     public HashMap<String, String> describeTable(Class classOfTable) {
@@ -133,5 +131,12 @@ public class SQLiteDriver implements IDriverHandler {
         describer.append(simpleName);
         describer.append("')");
         return describer.toString();
+    }
+
+    private void outputDebugIfSet(String query) {
+        if(debug) {
+            System.out.println("query: \n" + query);
+            //return;
+        }
     }
 }
