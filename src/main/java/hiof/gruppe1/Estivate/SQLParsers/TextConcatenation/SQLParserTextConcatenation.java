@@ -137,7 +137,6 @@ public class SQLParserTextConcatenation implements ISQLParser {
                 objectParser.writeToCollection(object, v, k);
                 return;
             }
-
             int childId = getChildId(castTo, parentId, k, v);
             if (childId > 0) {
                 objectParser.addElementToObject(object, readFromDatabase(v, childId), k);
