@@ -60,7 +60,7 @@ public class ReflectionParser implements IObjectParser {
             throw new RuntimeException(e);
         }
     }
-
+    @SuppressWarnings("unchecked")
     @Override
     public <T, S> void addElementsToCollectionQueue(T baseElement, S appendingElement, String setter) {
         int collectionHash = getCollectionHash(baseElement, setter);
@@ -73,21 +73,25 @@ public class ReflectionParser implements IObjectParser {
         }
         collectionWriteQueue.get(collectionHash).add(appendingElement);
     }
+    @SuppressWarnings("unchecked")
     @Override
     public <T, S> void writeToCollection(T baseElement, S appendedElement, String variableName) {
         int collectionHash = getCollectionHash(baseElement, variableName);
         String firstUpper = variableName.toLowerCase().substring(0, 1).toUpperCase();
         String getter = "get" + firstUpper + variableName.substring(1);
         String setter = "set" + firstUpper + variableName.substring(1);
+
         Collection<?> writeCollection;
         try {
-            writeCollection = (Collection<?>) baseElement.getClass().getMethod(getter).invoke(baseElement);
-            writeCollection.addAll(collectionWriteQueue.get(collectionHash));
-
+            Queue valueQueue = collectionWriteQueue.get(collectionHash);
+            if(valueQueue != null) {
+                writeCollection = (Collection<?>) baseElement.getClass().getMethod(getter).invoke(baseElement);
+                writeCollection.addAll(valueQueue);
+                addElementToObject(baseElement, writeCollection, setter);
+            }
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        addElementToObject(baseElement, writeCollection, setter);
     }
     // Used to manually create a collection, getting the collection directly proved better.
     // Stored in case it might be useful in some context.

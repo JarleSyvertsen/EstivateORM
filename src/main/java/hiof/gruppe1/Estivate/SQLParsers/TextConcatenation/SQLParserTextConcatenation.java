@@ -137,7 +137,6 @@ public class SQLParserTextConcatenation implements ISQLParser {
                 objectParser.writeToCollection(object, v, k);
                 return;
             }
-
             int childId = getChildId(castTo, parentId, k, v);
             if (childId > 0) {
                 objectParser.addElementToObject(object, readFromDatabase(v, childId), k);
@@ -149,8 +148,13 @@ public class SQLParserTextConcatenation implements ISQLParser {
 
     private <T> ArrayList<T> objectsFromQuerySet(Class<T> castTo, String SQLQuery) {
         HashMap<String, String> describedTable = sqlDriver.describeTable(castTo);
-
         ResultSet querySet = sqlDriver.executeQuery(SQLQuery);
+
+        if(querySet == null) {
+            System.out.println("Malformed query, possibly related to a getMany or getAggregate function call.");
+            System.out.println("The offending query was: " + SQLQuery);
+            return null;
+        }
 
         ArrayList<T> arrayOfObjects = new ArrayList<>();
         try {
