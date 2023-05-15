@@ -4,7 +4,7 @@ import hiof.gruppe1.Estivate.EstivateCore.EstivatePersist;
 import hiof.gruppe1.Estivate.Objects.SQLConnection;
 
 public class EstivateBuilder {
-    private String relativeURL;
+    private String relativeURL = "EstivateDB.db";
     private Boolean debug = false;
     private SQLConnection connection = new SQLConnection(this);
     public EstivateBuilder() {
