@@ -135,8 +135,7 @@ public class SQLiteDriver implements IDriverHandler {
 
     private void outputDebugIfSet(String query) {
         if(debug) {
-            System.out.println("query: \n" + query);
-            //return;
+            System.out.println(query);
         }
     }
 }
