@@ -26,10 +26,6 @@ public class EstivateTransaction {
      *
      * @return EstivateAggregateTransaction
      */
-    public EstivateTransaction getAggreagate() {
-        sqlMultiCommand = new SQLMultiCommand(driverHandler);
-        return this;
-    }
 
     /**
      * If the function generates more than one result, users can define which data structure to return. If none is defined, an Array is used as default.
@@ -71,6 +67,11 @@ public class EstivateTransaction {
      * @return EstivateMultiTransaction
      */
     public <T> EstivateTransaction sumFields(Class<T> workingClass, String condition, String sumColumn, String resultName) {
+        SQLMultiCommand temp = new SQLMultiCommand(driverHandler);
+        temp.addSelect(String.format("sum(%s)", sumColumn));
+        temp.retrieveClass(workingClass);
+        temp.addCondition(condition);
+        results.put(resultName, new SQLAttribute(int.class, temp.getIntValue()));
         return this;
     }
 
