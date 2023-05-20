@@ -26,12 +26,22 @@ public class EstivatePersist {
     private config WorkingConfiguration;
     private final IDriverHandler sqlDriver;
 
+
     public EstivatePersist(String relativeURL, Boolean debug) {
         this.objectParser = new ReflectionParser();
         this.sqlDriver = new SQLiteDriver(relativeURL, debug);
         this.SQLParser = new SQLParserTextConcatenation(sqlDriver);
         WorkingConfiguration = new config();
         License.iConfirmNonCommercialUse("Estivate");
+    }
+    /**
+     * Save is an alias for persist.
+     *
+     * @param object
+     * @return Boolean
+     */
+    public Boolean save(Object object) {
+        return persist(object);
     }
 
     /**
