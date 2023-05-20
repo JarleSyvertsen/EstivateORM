@@ -41,35 +41,35 @@ public class EstivateTransaction {
     /**
      * Counts the given rows of a query, and stores is into an internal result with the name given in resultName. This name can then be refered to via the result function later. The class parameter is used to find which table to search (can be changed via config), and the string condition allows users to append conditions to use when fetching in the given table.
      *
-     * @param tableClass
+     * @param queryTable
      * @param condition
      * @param resultName
      * @param <T>
      * @return EstivateMultiTransaction
      */
-    public <T> EstivateTransaction count(Class<T> tableClass, String condition, String resultName) {
+    public <T> EstivateTransaction count(Class<T> queryTable, String condition, String resultName) {
         SQLMultiCommand temp = new SQLMultiCommand(driverHandler);
         temp.addSelect("count(*)");
-        temp.retrieveClass(tableClass);
+        temp.retrieveClass(queryTable);
         temp.addCondition(condition);
         results.put(resultName, new SQLAttribute(int.class, temp.getIntValue()));
         return this;
     }
 
     /**
-     * Sums the value of a given table using the sumField parameter to define which column to search. The parameter tableClass is used to find which table to query, additionally using condition to restrict the amount of rows used in the result. The sum is stored into resultName, for later use in the result function.
+     * Sums the value of a given table using the sumField parameter to define which column to search. The parameter queryTable is used to find which table to query, additionally using condition to restrict the amount of rows used in the result. The sum is stored into resultName, for later use in the result function.
      *
-     * @param tableClass
+     * @param queryTable
      * @param condition
      * @param sumColumn
      * @param resultName
      * @param <T>
      * @return EstivateMultiTransaction
      */
-    public <T> EstivateTransaction sum(Class<T> tableClass, String condition, String sumColumn, String resultName) {
+    public <T> EstivateTransaction sum(Class<T> queryTable, String condition, String sumColumn, String resultName) {
         SQLMultiCommand temp = new SQLMultiCommand(driverHandler);
         temp.addSelect(String.format("sum(%s)", sumColumn));
-        temp.retrieveClass(tableClass);
+        temp.retrieveClass(queryTable);
         temp.addCondition(condition);
         results.put(resultName, new SQLAttribute(int.class, temp.getIntValue()));
         return this;
@@ -78,13 +78,13 @@ public class EstivateTransaction {
     /**
      * Takes a string in the form of mathematical equation. Here, the user refer to the resultNames previously defined. The result of the operation is returned as a single value.
      *
-     * @param command
+     * @param equation
      * @return Double result
      */
-    public double result(String command) {
+    public double result(String equation) {
         // Not sure if its gonna work, buth mathX is a library for parsing strings and create
         // Arguments out of the SQLAttributes here
-        Expression exp = new Expression(command);
+        Expression exp = new Expression(equation);
 
         results.forEach((k, v) -> exp.addArguments(new Argument(k + " = " + v.getDataRaw())));
         return exp.calculate();
