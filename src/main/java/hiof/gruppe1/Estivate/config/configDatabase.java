@@ -11,9 +11,11 @@ import java.sql.Connection;
 public class configDatabase {
     Connection connection;
 
-    public configDatabase() {
-    }
-
+    /**
+     * An object which allows direct access to the current working database.
+     * Intended to be returned through other functions.
+     * @param connection A connection object for the currently active database.
+     */
     public configDatabase(Connection connection) {
         this.connection = connection;
     }
@@ -29,7 +31,7 @@ public class configDatabase {
     /**
      *
      Provides an object where the user can define the location of the SQL dump file, and which database to store the result of the dump file. In addition, the user can define the working user for the command, to support running with elevated permissions.
-     * @return
+     * @return SQLRestoreCommand
      */
     public SQLRestoreCommand restoreSQLDump() {
         return new SQLRestoreCommand();

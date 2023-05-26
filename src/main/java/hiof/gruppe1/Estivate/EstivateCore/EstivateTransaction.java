@@ -22,29 +22,12 @@ public class EstivateTransaction {
     HashMap<String, SQLAttribute> results = new HashMap<>();
 
     /**
-     * getAggregate serves as a way to initialize a new transaction, and is thus preferred when starting a transaction of this kind.
-     *
-     * @return EstivateAggregateTransaction
-     */
-
-    /**
-     * If the function generates more than one result, users can define which data structure to return. If none is defined, an Array is used as default.
-     *
-     * @param format (LinkedList, ArrayList, HashMap, Array, HashSet)
-     * @return EstivateMultiTransaction
-     */
-    public EstivateTransaction retrieveFormat(String format) {
-        sqlMultiCommand.retrieveFormat(format);
-        return this;
-    }
-
-    /**
-     * Counts the given rows of a query, and stores is into an internal result with the name given in resultName. This name can then be refered to via the result function later. The class parameter is used to find which table to search (can be changed via config), and the string condition allows users to append conditions to use when fetching in the given table.
-     *
-     * @param queryTable
-     * @param condition
-     * @param resultName
-     * @param <T>
+     * Counts the given rows of a query, and stores the result with the name as defined in the resultName parameter.
+     * This result can then be referred to in the result function via the resultName.
+     * The class parameter is used to find which table to search (can be changed via config), and the string condition allows users to append conditions to use when fetching in the given table.
+     * @param queryTable The class object which relates to the table one which to query.
+     * @param condition A SQL formatted condition to narrow down the queried rows, can be NULL. WHERE is automatically added.
+     * @param resultName The name of the stored variable for later reference by .result
      * @return EstivateMultiTransaction
      */
     public <T> EstivateTransaction count(Class<T> queryTable, String condition, String resultName) {
@@ -57,13 +40,13 @@ public class EstivateTransaction {
     }
 
     /**
-     * Sums the value of a given table using the sumField parameter to define which column to search. The parameter queryTable is used to find which table to query, additionally using condition to restrict the amount of rows used in the result. The sum is stored into resultName, for later use in the result function.
-     *
-     * @param queryTable
-     * @param condition
-     * @param sumColumn
-     * @param resultName
-     * @param <T>
+     * Sums the value of a given table using the sumField parameter to define which column to search.
+     * The parameter queryTable is used to find which table to query, additionally using condition to restrict the amount of rows used in the result.
+     * The sum is stored into resultName, for later use in the result function.
+     * @param queryTable The class object which relates to the table one which to query.
+     * @param condition A SQL formatted condition to narrow down the queried rows, can be NULL. WHERE is automatically added.
+     * @param sumColumn The name of the column the sum operation is applied on, will  mirror the class attribute unless overwritten.
+     * @param resultName The name of the stored variable for later reference by .result
      * @return EstivateMultiTransaction
      */
     public <T> EstivateTransaction sum(Class<T> queryTable, String condition, String sumColumn, String resultName) {
@@ -76,16 +59,14 @@ public class EstivateTransaction {
     }
 
     /**
-     * Takes a string in the form of mathematical equation. Here, the user refer to the resultNames previously defined. The result of the operation is returned as a single value.
-     *
-     * @param equation
-     * @return Double result
+     * Takes a string in the form of mathematical equation.
+     * The variables as defined in sum/count can be employed here.
+     * The result of the operation is returned as a single value.
+     * @param equation A user defined equation using the variables produced by sum/count.
+     * @return double
      */
     public double result(String equation) {
-        // Not sure if its gonna work, buth mathX is a library for parsing strings and create
-        // Arguments out of the SQLAttributes here
         Expression exp = new Expression(equation);
-
         results.forEach((k, v) -> exp.addArguments(new Argument(k + " = " + v.getDataRaw())));
         return exp.calculate();
     }
