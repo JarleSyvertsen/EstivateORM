@@ -52,14 +52,6 @@ public class ReflectionParser implements IObjectParser {
             }
         }
     }
-    public Boolean hasSubElements(String castingClass) {
-        try {
-            HashMap<String, Class<?>> subElements = getSubElementList(createClassOfType(Class.forName(castingClass)));
-            return !subElements.isEmpty();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
     @SuppressWarnings("unchecked")
     @Override
     public <T, S> void addElementsToCollectionQueue(T baseElement, S appendingElement, String setter) {
@@ -93,17 +85,6 @@ public class ReflectionParser implements IObjectParser {
             throw new RuntimeException(e);
         }
     }
-    // Used to manually create a collection, getting the collection directly proved better.
-    // Stored in case it might be useful in some context.
-    private static <T> String getCollectionType(T baseElement, String setter) {
-        for(Method method : baseElement.getClass().getMethods()) {
-            if(method.getName().equals(setter)) {
-                  return method.getParameterTypes()[0].getName();
-            }
-        }
-        return null;
-    }
-
     public <T> int getCollectionHash(T object, String setter) {
         return Objects.hash(object.hashCode(), setter.hashCode());
     }
@@ -121,8 +102,6 @@ public class ReflectionParser implements IObjectParser {
         }
         return subElementList;
     }
-
-
     public <T> Class<?> getCollectionInnerClass(T castingClass, String setName) {
         Class<?> typeClass;
         try {
@@ -150,7 +129,6 @@ public class ReflectionParser implements IObjectParser {
             }
         }
     }
-
     private static <T> T createClassOfType(Class<T> castTo) throws RuntimeException {
         T creationObject;
         try {

@@ -23,7 +23,7 @@ public class EstivatePersist {
     // Default, could be defined by config if multiple parsers are present.
     private final IObjectParser objectParser;
     private final ISQLParser SQLParser;
-    private config WorkingConfiguration;
+    private final config  WorkingConfiguration;
     private final IDriverHandler sqlDriver;
 
     public EstivatePersist(String relativeURL, Boolean debug) {
@@ -33,12 +33,24 @@ public class EstivatePersist {
         WorkingConfiguration = new config();
         License.iConfirmNonCommercialUse("Estivate");
     }
+    /**
+     * Save is an alias for the persist function.
+     *
+     * @param object The object to be persisted.
+     *               Every attribute must be either a simple (String, Int, Double, Boolean, Float)
+     *               Or be a class/collection of classes which recursively fits these conditions.
+     * @return Boolean
+     */
+    public Boolean save(Object object) {
+        return persist(object);
+    }
 
     /**
      * Persist serves as the primary function to store arbitary objects to database. The object will be divided into primitives (stored in a table with the same name, unless overwritten via config), and embedded objects will be stored in their respective table, with a many-to-many relationship by default.
      *
-     * @param object
-     * @return Boolean
+     * @param object The object to be persisted.
+     *               Every attribute must be either a simple (String, Int, Double, Boolean, Float)
+     *               Or be a class/collection of classes which recursively fits these conditions     * @return Boolean
      */
     public Boolean persist(Object object) {
         HashMap<String, SQLAttribute> attributes = objectParser.parseObjectToAttributeList(object);
@@ -51,9 +63,8 @@ public class EstivatePersist {
     /**
      * getOne allows for fetching singular objects when the ID of the object is known. A class object is provided both to determine which class to cast to, but also which table to query. This class-table association can be overwritten in config if needed.
      *
-     * @param id
-     * @param output
-     * @param <T>
+     * @param id The database id of the object to retrieve.
+     * @param output The class the resulting element will be cast to.
      * @return Object of type <T>
      */
     public <T> T getOne(int id, Class<T> output) {
@@ -61,20 +72,19 @@ public class EstivatePersist {
     }
 
     /**
-     * getAll allows one to fetch all elements of a given class. The given class is used to determine which table to query, if this is insufficent, this association can be overwritten in config.
+     * getAll allows one to fetch all elements of a given class. The given class is used to determine which table to query, if this is insufficient, this association can be overwritten in config.
      *
-     * @param output
-     * @param <T>
-     * @return ArrayList<Class>
+     * @param output The class the resulting elements will be cast to.
+     * @return ArrayList<T>
      */
     public <T> ArrayList<T> getAll(Class<T> output) {
         return SQLParser.readFromDatabase(output);
     }
 
     /**
-     * Get many serves as the primary function for more complex queries, built up via a builder-pattern of commands registered on the SQLSearchQuery object. Each object that is fetched through this function will be cast to the given class and stored in a new object of the given format.
-     *
-     * @param <T>
+     * GetMany serves as the primary function for more complex queries.
+     * GetMany returns a SQLSearchQuery object, which allows adding conditions in a builder pattern.
+     * AsCollection options are finally called to return the given elements in the desired format.
      * @return SQLSearchQuery queries
      */
     public SQLSearchQuery getMany() {
@@ -82,8 +92,9 @@ public class EstivatePersist {
     }
 
     /**
-     * Used when the user want to make use of the SQL transaction to wrap multiple commands into a batch, and atomically resolve all operations together.
-     * Specifically useful for aggregateTransactions.
+     * Used for fetching data across tables via aggregate functions (sum/count) to be used in equations.
+     * An EstivateTransaction object is return which provides aggregate functions and the potential to store the results as temporary values.
+     * The result function is finally called with a user provided equation, and the answer returned as a double.
      * @return EstivateTransaction
      */
     public EstivateTransaction startAggregate() {

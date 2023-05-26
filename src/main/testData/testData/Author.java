@@ -1,23 +1,36 @@
 package hiof.gruppe1.testData;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Author {
     private int id;
     private String name;
-    private String books;
     private String secret;
     private Page favoritePage;
 
     private Page leastFavoritePage;
     private Food favoriteFood;
     private ArrayList<Page> pages = new ArrayList<>();
+    private Set<Book> books = new HashSet<>();
     public Food getFavoriteFood() {
         return favoriteFood;
     }
 
     public ArrayList<Page> getPages() {
         return pages;
+    }
+    public void addBook(Book book) {
+        books.add(book);
+    }
+
+    public Set<Book> getBooks() {
+        return books;
+    }
+
+    public void setBooks(Set<Book> books) {
+        this.books = books;
     }
 
     public void setPages(ArrayList<Page> pages) {
@@ -50,11 +63,11 @@ public class Author {
 
     public Author() {
     }
-
-    public Author(String name, String books) {
+    public Author(String name) {
         this.name = name;
-        this.books = books;
     }
+
+
 
     public int getId() {
         return id;
@@ -72,13 +85,6 @@ public class Author {
         this.name = name;
     }
 
-    public String getBooks() {
-        return books;
-    }
-
-    public void setBooks(String books) {
-        this.books = books;
-    }
 
     public String getSecret() {
         return secret;
