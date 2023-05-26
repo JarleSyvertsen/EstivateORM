@@ -82,7 +82,7 @@ public class EstivatePersist {
     }
 
     /**
-     * Get many serves as the primary function for more complex queries.
+     * GetMany serves as the primary function for more complex queries.
      * GetMany returns a SQLSearchQuery object, which allows adding conditions in a builder pattern.
      * AsCollection options are finally called to return the given elements in the desired format.
      * @return SQLSearchQuery queries
